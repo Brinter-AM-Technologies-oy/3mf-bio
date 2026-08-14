@@ -42,23 +42,6 @@ jobs:
           python3 spec/conformance_tests.py || fail=1
           exit $fail
 
-      - name: Rebuild the downloadable packages from source
-        run: |
-          python3 - <<'PY'
-          import os, zipfile
-          for src, out in [("examples", "examples-package.3mf"),
-                           ("examples-extrusion", "examples-extrusion-package.3mf")]:
-              with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
-                  z.write(os.path.join(src, "[Content_Types].xml"), "[Content_Types].xml")
-                  for root, _, files in os.walk(src):
-                      for f in sorted(files):
-                          p = os.path.join(root, f)
-                          rel = os.path.relpath(p, src).replace(os.sep, "/")
-                          if rel != "[Content_Types].xml":
-                              z.write(p, rel)
-              print("built", out)
-          PY
-
       - name: Build the site
         run: python3 site/build_site.py
 

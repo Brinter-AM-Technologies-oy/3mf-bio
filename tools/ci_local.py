@@ -17,11 +17,20 @@ repository root, exactly as the runner would. It cannot reproduce the runner ima
 class of failure that actually bit: a command whose exit code means something other than
 "broken".
 
-    python3 tools/ci_local.py                 both workflows
+    python3 tools/ci_local.py                 both workflows, in a pristine copy
     python3 tools/ci_local.py validate        one workflow
+    python3 tools/ci_local.py --dirty         use the working tree instead
+
+PRISTINE BY DEFAULT. This is the second lesson. The site check reported 0 broken links here
+and 2 in CI, for a long time, because the .3mf packages are gitignored: they existed in the
+working tree so the site copied them, and did not exist on a fresh checkout so the download
+page linked to nothing. Testing against the working tree cannot see that class of bug at all.
+Everything is copied to a temporary directory with ignored and untracked files excluded,
+which is what the runner actually gets.
 """
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -139,8 +148,41 @@ def check_dependencies(files, wfdir):
     return fails
 
 
+def pristine_copy():
+    """A temp copy holding only what git tracks -- what the runner checks out."""
+    import tempfile
+    r = subprocess.run(["git", "ls-files"], cwd=ROOT, capture_output=True, text=True)
+    if r.returncode:
+        print("  not a git repository; falling back to the working tree")
+        return None
+    dest = tempfile.mkdtemp(prefix="ci-pristine-")
+    for rel in r.stdout.splitlines():
+        src, dst = os.path.join(ROOT, rel), os.path.join(dest, rel)
+        if not os.path.exists(src):
+            continue
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        shutil.copy2(src, dst)
+    # A runner checkout is a git repository, and some steps depend on that -- the
+    # line-ending check reads .gitattributes via `git check-attr`, which needs a repo.
+    # Without this the harness reports a failure that only exists in the harness.
+    subprocess.run(["git", "init", "-q"], cwd=dest, capture_output=True)
+    subprocess.run(["git", "add", "-A"], cwd=dest, capture_output=True)
+    return dest
+
+
 def main():
-    which = sys.argv[1] if len(sys.argv) > 1 else None
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    dirty = "--dirty" in sys.argv
+    which = args[0] if args else None
+    global ROOT
+    if not dirty:
+        p = pristine_copy()
+        if p:
+            n = len(subprocess.run(["git", "ls-files"], cwd=ROOT, capture_output=True,
+                                   text=True).stdout.splitlines())
+            print(f"\nrunning against a pristine copy of {n} tracked file(s), as the runner "
+                  f"would\n(use --dirty to test the working tree instead)")
+            ROOT = p
     wfdir = os.path.join(ROOT, ".github", "workflows")
     files = sorted(f for f in os.listdir(wfdir) if f.endswith(".yml"))
     if which:

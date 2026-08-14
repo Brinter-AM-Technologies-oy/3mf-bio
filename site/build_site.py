@@ -22,6 +22,7 @@ import re
 import shutil
 import socketserver
 import sys
+import zipfile
 
 import markdown
 
@@ -382,12 +383,28 @@ def build():
     # viewer, verbatim
     copy(os.path.join(ROOT, "tools", "viewer.html"), "/viewer/index.html")
 
-    # downloads
+    # downloads.
+    # Build the .3mf packages here rather than copying pre-built ones. They are gitignored
+    # because CI regenerates them, so on a fresh checkout they do not exist -- and copying
+    # "if present" meant the download page linked to files that were silently absent. That
+    # passed locally, where they happen to exist, and failed in CI. A page that advertises a
+    # download must produce the download.
     write("/download/index.html", shell("Download — 3MF Bio", download_page(), "/download/"))
-    for f in ("examples-package.3mf", "examples-extrusion-package.3mf"):
-        p = os.path.join(ROOT, f)
-        if os.path.exists(p):
-            copy(p, f"/downloads/{f}")
+    for src, name in (("examples", "examples-package.3mf"),
+                      ("examples-extrusion", "examples-extrusion-package.3mf")):
+        srcdir = os.path.join(ROOT, src)
+        if not os.path.isdir(srcdir):
+            sys.exit(f"cannot build {name}: {src}/ is missing")
+        dst = os.path.join(OUT, "downloads", name)
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        with zipfile.ZipFile(dst, "w", zipfile.ZIP_DEFLATED) as z:
+            z.write(os.path.join(srcdir, "[Content_Types].xml"), "[Content_Types].xml")
+            for root, _, files in os.walk(srcdir):
+                for f in sorted(files):
+                    q = os.path.join(root, f)
+                    rel = os.path.relpath(q, srcdir).replace(os.sep, "/")
+                    if rel != "[Content_Types].xml":
+                        z.write(q, rel)
 
     # the namespace must actually resolve
     write("/ns/bio/2026/07/index.html", shell(f"Namespace {NS}", ns_page(), "/",
