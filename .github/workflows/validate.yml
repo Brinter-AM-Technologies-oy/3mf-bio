@@ -71,10 +71,21 @@ jobs:
           python3 spec/validate_schema.py examples
           python3 spec/validate_schema.py examples-extrusion
 
-      - name: Package rules (errors fail the build)
+      - name: Package rules (errors fail the build; warnings do not)
         run: |
-          python3 spec/validate_bio.py examples
-          python3 spec/validate_bio.py examples-extrusion
+          # validate_bio.py exits 1 on errors, 2 on warnings-only, 0 when clean. Both
+          # exemplars carry warnings deliberately -- unresolved blocking open items are the
+          # demonstration -- so only exit 1 is a build failure.
+          fail=0
+          for pkg in examples examples-extrusion; do
+            python3 spec/validate_bio.py "$pkg" && rc=0 || rc=$?
+            case $rc in
+              0) echo "$pkg: clean" ;;
+              2) echo "$pkg: warnings only, acceptable" ;;
+              *) echo "$pkg: FAILED with exit $rc"; fail=1 ;;
+            esac
+          done
+          exit $fail
 
       - name: Schematron MUST-level rules
         run: |
@@ -163,8 +174,16 @@ jobs:
           python3 - <<'PY'
           import re, sys
           h = open("tools/viewer.html").read()
-          for need in ("<!DOCTYPE html>", "https://3mfbio.com/ns/bio/2026/07", "JSZip", "three.min.js"):
+          for need in ("<!DOCTYPE html>", "JSZip", "three.min.js"):
               assert need in h, f"viewer.html missing {need}"
+          # The viewer hardcodes the namespace in order to read packages. If it drifts from
+          # what the exemplars declare it renders an empty run sheet, silently, with no error.
+          viewer_ns = re.search(r'const BIO = "([^"]+)"', h).group(1)
+          pkg_ns = re.search(r'xmlns:b="([^"]+)"',
+                             open("examples/3D/3dmodel.model").read()).group(1)
+          assert viewer_ns == pkg_ns, (
+              f"viewer expects {viewer_ns} but packages declare {pkg_ns}")
+          print("viewer namespace matches the exemplars:", viewer_ns)
           # the viewer must not post the package anywhere
           for bad in ("fetch(", "XMLHttpRequest", "navigator.sendBeacon", "action="):
               assert bad not in h, f"viewer.html contains {bad!r}; it must stay local-only"
@@ -186,7 +205,8 @@ jobs:
                           z.write(p, rel)
           print("built", out)
           PY
-          python3 spec/validate_bio.py examples-package.3mf
+          python3 spec/validate_bio.py examples-package.3mf && rc=0 || rc=$?
+          [ "$rc" = "0" ] || [ "$rc" = "2" ] || exit "$rc"
 
       - uses: actions/upload-artifact@v4
         with:

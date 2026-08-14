@@ -33,9 +33,14 @@ jobs:
 
       - name: Gate - the examples must validate before anything is published
         run: |
-          python3 spec/validate_bio.py examples
-          python3 spec/validate_bio.py examples-extrusion
-          python3 spec/conformance_tests.py
+          # exit 2 is warnings-only and acceptable; exit 1 is an error and must stop the deploy
+          fail=0
+          for pkg in examples examples-extrusion; do
+            python3 spec/validate_bio.py "$pkg" && rc=0 || rc=$?
+            [ "$rc" = "0" ] || [ "$rc" = "2" ] || { echo "$pkg FAILED ($rc)"; fail=1; }
+          done
+          python3 spec/conformance_tests.py || fail=1
+          exit $fail
 
       - name: Rebuild the downloadable packages from source
         run: |

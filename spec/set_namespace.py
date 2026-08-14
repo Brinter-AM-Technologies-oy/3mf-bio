@@ -21,7 +21,11 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PATTERN = re.compile(r'(https://3mfbio.com/ns/bio/2026/07|https?://(?!YOUR-DOMAIN)[^\s"\'<>]*?/bio/2026/07)')
 SKIP_DIRS = {".git", "__pycache__", "conformance", ".github/workflows"}
-EXTS = {".xsd", ".sch", ".py", ".model", ".md", ".xml", ".rels", ".json", ".yml", ".cff"}
+# .html matters: tools/viewer.html hardcodes the namespace to read packages. Omitting it
+# left the viewer looking for the old URI, so it rendered an empty run sheet for every
+# package produced after a namespace change -- silently, with no error anywhere.
+EXTS = {".xsd", ".sch", ".py", ".model", ".md", ".xml", ".rels", ".json", ".yml", ".cff",
+        ".html", ".txt"}
 
 
 def files():

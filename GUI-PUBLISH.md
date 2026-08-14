@@ -62,7 +62,9 @@ manually dragging a selection in Explorer or Finder often does not.
 
 ## Step 4 — Check Desktop sees everything
 
-Switch to GitHub Desktop. The **Changes** tab should now list **79 files**.
+Switch to GitHub Desktop. The **Changes** tab should now list **78 files** (the two `.3mf` packages are
+deliberately excluded — CI rebuilds them from source, so tracking the binaries would let them
+drift from the directories they came from).
 
 Scroll to the top of that list. You should see entries beginning `.github/`:
 
