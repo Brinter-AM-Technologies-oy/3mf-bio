@@ -64,6 +64,67 @@ def steps(path):
     return out
 
 
+def third_party_imports():
+    """Modules imported anywhere in the repository that are not stdlib and not local."""
+    import ast
+    local = {os.path.splitext(f)[0] for r, d, fs in os.walk(ROOT) for f in fs
+             if f.endswith(".py")}
+    stdlib = set(sys.stdlib_module_names)
+    found = {}
+    for root, dirs, files in os.walk(ROOT):
+        dirs[:] = [d for d in dirs if d not in {".git", "_build", "conformance", "__pycache__"}]
+        for f in files:
+            if not f.endswith(".py"):
+                continue
+            path = os.path.join(root, f)
+            try:
+                tree = ast.parse(open(path, encoding="utf-8").read())
+            except (SyntaxError, UnicodeDecodeError):
+                continue
+            for node in ast.walk(tree):
+                mod = None
+                if isinstance(node, ast.Import):
+                    mod = node.names[0].name.split(".")[0]
+                elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+                    mod = node.module.split(".")[0]
+                if mod and mod not in stdlib and mod not in local:
+                    found.setdefault(mod, set()).add(os.path.relpath(path, ROOT))
+    return found
+
+
+# Imported only by tools a workflow never invokes.
+NOT_IN_CI = {"yaml": "tools/setup_repo.py, not run in CI"}
+
+
+def check_dependencies(files, wfdir):
+    """Compare each workflow's pip install line against what the repository imports."""
+    print(f"\n{'=' * 74}\n  dependency declarations\n{'=' * 74}")
+    imports = third_party_imports()
+    fails = 0
+    for wf in files:
+        s = open(os.path.join(wfdir, wf), encoding="utf-8").read()
+        m = re.search(r"pip install ([^\n]+)", s)
+        declared = set(m.group(1).split()) if m else set()
+        # which scripts does this workflow actually invoke
+        invoked = set(re.findall(r"python3 ([\w/\.\-]+\.py)", s))
+        needed = set()
+        for mod, users in imports.items():
+            if mod in NOT_IN_CI:
+                continue
+            if any(u in invoked for u in users):
+                needed.add(mod)
+        # verify.py runs the whole suite, so it pulls in everything those scripts need
+        if "verify.py" in invoked:
+            needed |= {m for m in imports if m not in NOT_IN_CI}
+        missing = needed - declared
+        if missing:
+            fails += 1
+            print(f"  FAIL  {wf}: installs {sorted(declared)} but needs {sorted(missing)}")
+        else:
+            print(f"  PASS  {wf}: installs {sorted(declared)}, covers {sorted(needed)}")
+    return fails
+
+
 def main():
     which = sys.argv[1] if len(sys.argv) > 1 else None
     wfdir = os.path.join(ROOT, ".github", "workflows")
@@ -74,6 +135,13 @@ def main():
         sys.exit(f"no workflow matching {which!r}")
 
     total_fail = 0
+
+    # The simulator runs in whatever environment it finds, so it cannot notice a module the
+    # workflow forgets to install -- which is exactly what failed the second push:
+    # validate.yml installed lxml but not markdown, and verify.py builds the site. Check the
+    # declared dependencies against what the code actually imports, statically.
+    total_fail += check_dependencies(files, wfdir)
+
     for wf in files:
         path = os.path.join(wfdir, wf)
         print(f"\n{'=' * 74}\n  {wf}\n{'=' * 74}")
