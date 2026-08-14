@@ -153,12 +153,28 @@ def check_site():
             if not f.endswith(".html"):
                 continue
             pages += 1
-            for m in re.findall(r'href="(/[^"#]*)"',
-                                open(os.path.join(root, f), encoding="utf-8").read()):
+            src = os.path.relpath(os.path.join(root, f), build)
+            text = open(os.path.join(root, f), encoding="utf-8").read()
+            # absolute links
+            for m in re.findall(r'href="(/[^"#]*)"', text):
                 t = m if m.endswith("/") or "." in os.path.basename(m) else m + "/"
                 if t not in have and m not in have:
-                    bad.append(m)
-    return not bad, f"{pages} pages, {len(bad)} broken internal links"
+                    bad.append(f"{src} -> {m}")
+            # relative links, previously unchecked entirely. Skip anchors, external URLs
+            # and JS template literals, which appear inside the viewer's inlined script.
+            for m in re.findall(r'href="([^"#:]+)"', text):
+                if m.startswith(("/", "http", "#", "$", "{")) or "${" in m:
+                    continue
+                target = os.path.normpath(os.path.join(os.path.dirname(src), m))
+                if not os.path.exists(os.path.join(build, target)) and \
+                        not os.path.exists(os.path.join(build, target, "index.html")):
+                    bad.append(f"{src} -> {m} (relative)")
+    # Name them. A count tells you something is wrong and nothing about what, which is how
+    # a link failure in CI that does not reproduce locally becomes an afternoon of guessing.
+    detail = f"{pages} pages, {len(bad)} broken internal links"
+    if bad:
+        detail += ": " + "; ".join(bad[:6]) + (" …" if len(bad) > 6 else "")
+    return not bad, detail
 
 
 def check_namespace_served():

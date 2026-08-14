@@ -1,13 +1,17 @@
 # One place. Both workflows install from this file, so a workflow can no longer declare a
-# dependency set that differs from what the code imports -- which is exactly how the second
-# push failed: validate.yml installed lxml, verify.py builds the site, and the site build
-# imports markdown.
+# dependency set that differs from what the code imports -- which is how the second push
+# failed: validate.yml installed lxml, verify.py builds the site, the site build imports
+# markdown.
+#
+# Versions are pinned with a lower bound and a major-version ceiling. Unpinned, CI installs
+# whatever is newest and a rendering change upstream becomes a failure in this repository
+# that does not reproduce locally.
 #
 # tools/ci_local.py checks this file against the repository's actual imports.
 
-lxml            # XML Schema, ISO Schematron, both validators
-markdown        # site/build_site.py
+lxml>=5.0,<7          # XML Schema, ISO Schematron, both validators
+markdown>=3.5,<4      # site/build_site.py
 
-# Optional. tools/setup_repo.py validates CITATION.cff stays valid YAML if this is present,
-# and says so plainly if it is not. Not needed by CI.
-# pyyaml
+# Optional. tools/setup_repo.py validates CITATION.cff stays valid YAML when present, and
+# says so plainly when it is not. CI does not run it.
+# pyyaml>=6,<7

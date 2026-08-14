@@ -83,6 +83,7 @@ jobs:
                       bad.append((p, m))
           for p, m in bad:
               print(f"broken: {p} -> {m}")
+          print(f"checked {len(list(glob.glob('**/*.html', recursive=True)))} pages")
           if bad:
               sys.exit(f"{len(bad)} broken internal link(s)")
           print("no broken internal links")
