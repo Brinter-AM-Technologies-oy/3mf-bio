@@ -271,7 +271,8 @@ python3 verify.py
 "fully checked" is something you run rather than something you are told. Currently **15/15
 passing**.
 
-[PUBLISH.md](PUBLISH.md) is the whole path from here to a live site with a DOI.
+[PUBLISH.md](PUBLISH.md) is the whole path from here to a live site with a DOI, and
+[ZENODO.md](ZENODO.md) covers the DOI specifically.
 [GUI-PUBLISH.md](GUI-PUBLISH.md) is the same path using only GitHub Desktop and a browser,
 with no command line.
 

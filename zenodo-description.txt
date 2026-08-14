@@ -1,0 +1,52 @@
+PASTE-READY METADATA FOR A MANUAL ZENODO UPLOAD
+Delete this file once the DOI exists; it is a convenience, not part of the project.
+
+TITLE
+3MF Bio: an open schema for recording biofabrication end to end
+
+VERSION
+v0.9.0
+
+UPLOAD TYPE
+Software
+
+LICENCE
+BSD 2-Clause "Simplified" License
+
+AUTHOR
+Family name: Prakash
+Given names: Dhayakumar Rajan
+ORCID: 0000-0003-2941-0604
+Affiliation: Brinter AM Technologies Oy
+
+KEYWORDS
+bioprinting, biofabrication, 3MF, additive manufacturing, file format, reproducibility,
+provenance, tissue engineering, bioreactor, characterization
+
+RELATED IDENTIFIERS
+https://github.com/Brinter-AM-Technologies-oy/3mf-bio   -> is supplement to
+https://3mfbio.com                                      -> is documented by
+
+DESCRIPTION
+An open schema, built on the 3MF package format, for recording biofabrication work end to end
+in a single file: material identity and synthesis route, cell provenance and authentication,
+formulation and rheology, print process across twenty modalities, deposition heads and
+nozzles, calibration events, staged post-print maturation with bioreactor and stimulation
+regimes, and assays measured over a timecourse.
+
+Its organising constraint is that every numeric parameter must declare where its value came
+from - measured, derived, cited, vendor or estimated - enforced by XML Schema, ISO Schematron
+and a reference validator. Fabricating a number requires labelling it as an estimate, which a
+reviewer or a release gate can filter on, and every estimated value must be owned by an open
+item recording what would close it.
+
+It is not a standard and asserts no acceptance thresholds: no viability floor, no endotoxin
+limit, no dimensional tolerance. It supplies the fields so that laboratories and manufacturers
+can record against their own criteria and their own roadmap. Filling those fields is not
+compliance and this project does not claim otherwise.
+
+Not affiliated with the 3MF Consortium. It follows their schema conventions so that packages
+remain readable by ordinary 3MF tools.
+
+Pre-1.0 working draft. No real dataset has yet been recorded in this schema; see
+review/DATASET-SHEET.md for exactly what would close that gap.

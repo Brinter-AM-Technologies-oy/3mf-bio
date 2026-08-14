@@ -1,0 +1,40 @@
+{
+  "title": "3MF Bio: an open schema for recording biofabrication end to end",
+  "description": "<p>An open schema, built on the 3MF package format, for recording biofabrication work end to end in a single file: material identity and synthesis route, cell provenance and authentication, formulation and rheology, print process across twenty modalities, deposition heads and nozzles, calibration events, staged post-print maturation with bioreactor and stimulation regimes, and assays measured over a timecourse.</p><p>Its organising constraint is that every numeric parameter must declare where its value came from, enforced by XML Schema, ISO Schematron and a reference validator.</p><p><strong>It is not a standard and asserts no acceptance thresholds.</strong> It supplies the fields so that laboratories and manufacturers can record against their own criteria. Filling them is not compliance.</p>",
+  "upload_type": "software",
+  "license": "BSD-2-Clause",
+  "access_right": "open",
+  "creators": [
+    {
+      "name": "Prakash, Dhayakumar Rajan",
+      "orcid": "0000-0003-2941-0604",
+      "affiliation": "Brinter AM Technologies Oy"
+    }
+  ],
+  "keywords": [
+    "bioprinting",
+    "biofabrication",
+    "3MF",
+    "additive manufacturing",
+    "file format",
+    "reproducibility",
+    "provenance",
+    "tissue engineering",
+    "bioreactor",
+    "characterization"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://3mfbio.com",
+      "relation": "isDocumentedBy",
+      "resource_type": "other",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://github.com/Brinter-AM-Technologies-oy/3mf-bio",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ],
+  "notes": "Pre-1.0 working draft. Not affiliated with the 3MF Consortium; follows their schema conventions so packages remain readable by ordinary 3MF tools. No real dataset has yet been recorded in this schema - see review/DATASET-SHEET.md."
+}
