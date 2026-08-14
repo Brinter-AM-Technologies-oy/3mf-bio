@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21939414.svg)](https://doi.org/10.5281/zenodo.21939414)
 # 3MF Bio Extension
 
 **An open schema for recording biofabrication work end to end — material synthesis, cells,
