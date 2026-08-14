@@ -1,0 +1,130 @@
+{
+  "profile_version": "1",
+  "vendor": "Brinter",
+  "platform": "Brinter 1 / Brinter Core",
+  "source_note": "Printhead lineup and drive principles compiled from Brinter public product material and press coverage (2021-2022). Bore sizes, pressure ranges and speeds are NOT included because they are configuration- and consumable-dependent and were not published in a form worth copying. The questionnaire asks for them; it does not assume them. MAINTAINER NOTE: this repository is published by Brinter AM Technologies Oy, so this profile can and should be replaced with authoritative figures from the product documentation rather than remaining a compilation of public sources. Until that happens it stays marked as compiled, because saying otherwise would be the exact overclaim this project exists to prevent.",
+  "sources": [
+    "brinteram.com/product/brinter-core/",
+    "3dprintingindustry.com/news/brinter-opens-up-accessibility-of-bioprinting-with-entry-level-brinter-core-technical-specifications-and-pricing-198964/",
+    "3dprintingindustry.com/news/brinter-and-puredyne-launch-new-visco-bio-printhead-for-precision-3d-bioprinting-205671/",
+    "pharmaceutical-networking.com/using-brinter-bioprinter-for-drug-printing/"
+  ],
+  "platform_notes": [
+    "Modular: one printhead mounted at a time, tool-free semi-automatic change, heads swap between Brinter products.",
+    "Native workflow is STL into a browser-based slicer, out as G-code. This integrator wraps that same STL with its dossier rather than replacing the slicer.",
+    "A disinfecting blue-light module is available; if used, record it under sterility_method."
+  ],
+  "printheads": [
+    {
+      "key": "pneuma",
+      "name": "Pneuma Tool",
+      "principle": "valve-free pneumatic extrusion",
+      "modality": "extrusion-pneumatic",
+      "drive": "pneumatic",
+      "temperaturecontrolled": false,
+      "controlled_variable": "extrusion_pressure",
+      "suits": "general-purpose extrusion of hydrogels and pastes"
+    },
+    {
+      "key": "pneuma-cooled",
+      "name": "Pneuma Cooled",
+      "principle": "pneumatic extrusion with cooling",
+      "modality": "extrusion-pneumatic",
+      "drive": "pneumatic",
+      "temperaturecontrolled": true,
+      "controlled_variable": "extrusion_pressure",
+      "suits": "low to medium viscosity hydrogels, silicones and pastes such as collagen or Matrigel",
+      "prompts": [
+        "cartridge_temp is a cooling setpoint here; record the value actually held, not the dial."
+      ]
+    },
+    {
+      "key": "pneuma-pro",
+      "name": "Pneuma Pro",
+      "principle": "pneumatic extrusion with heating",
+      "modality": "extrusion-pneumatic",
+      "drive": "pneumatic",
+      "temperaturecontrolled": true,
+      "controlled_variable": "extrusion_pressure",
+      "suits": "low to medium viscosity hydrogels with living cells at +37 C"
+    },
+    {
+      "key": "visco",
+      "name": "Visco Tool",
+      "principle": "screw-driven mechanical extrusion, endless piston pump",
+      "modality": "extrusion-screw",
+      "drive": "screw",
+      "temperaturecontrolled": false,
+      "controlled_variable": "volumetric_flow_rate",
+      "suits": "viscous pastes where a displacement drive gives better repeatability than pressure",
+      "prompts": [
+        "A progressive-cavity drive delivers a constant volume per revolution, so the controlled variable is a volume rate and a screw speed, NOT a pressure. Rule P0 will ask for volumetric_flow_rate and screw_speed."
+      ]
+    },
+    {
+      "key": "visco-bio",
+      "name": "Visco Bio",
+      "principle": "progressive cavity dispensing (Puredyne technology)",
+      "modality": "extrusion-screw",
+      "drive": "screw",
+      "temperaturecontrolled": false,
+      "controlled_variable": "volumetric_flow_rate",
+      "suits": "medical-grade materials where dead volume and cross-contamination matter",
+      "prompts": [
+        "Near-zero dead volume and one cartridge per material. If you are relying on single-cartridge-per-material to avoid cross-contamination, record it: it is a GMP-relevant control, not a convenience.",
+        "Programmable suck-back affects start and end points of every strand. Record the suck-back setting under an x- parameter if your acceptance criteria depend on strand ends."
+      ]
+    },
+    {
+      "key": "rotary",
+      "name": "Rotary Tool",
+      "principle": "screw-driven mechanical extrusion, endless piston pump",
+      "modality": "extrusion-screw",
+      "drive": "screw",
+      "temperaturecontrolled": false,
+      "controlled_variable": "volumetric_flow_rate"
+    },
+    {
+      "key": "droplet",
+      "name": "Droplet Tool / MicroDroplet Tool",
+      "principle": "electromagnetically actuated microvalve droplet dispensing, solenoid driven",
+      "modality": "microvalve",
+      "drive": "solenoid",
+      "temperaturecontrolled": false,
+      "controlled_variable": "droplet_volume",
+      "suits": "droplet deposition of low-viscosity fluids and cell suspensions"
+    },
+    {
+      "key": "granu",
+      "name": "Granu Tool",
+      "principle": "thermoplastic granulate extrusion",
+      "modality": "extrusion-screw",
+      "drive": "screw",
+      "temperaturecontrolled": true,
+      "controlled_variable": "volumetric_flow_rate",
+      "suits": "thermoplastic granules, or a thermoplastic binder mixed with powder fillers",
+      "prompts": [
+        "Barrel and nozzle can be heated to +250 C. If this head is running in the same build as a cell-laden head, record the thermal separation: a cartridge_temp of 200 C next to a cell-laden strand is a viability question, not just a process setting."
+      ]
+    },
+    {
+      "key": "multifluidic",
+      "name": "Multi-fluidic printing tool",
+      "principle": "digital multifluidic, many material combinations from one head",
+      "modality": "extrusion-pneumatic",
+      "drive": "pneumatic",
+      "temperaturecontrolled": false,
+      "controlled_variable": "extrusion_pressure",
+      "prompts": [
+        "This head can produce many material combinations in a single build. The format expects each distinct formulation to be its own <b:bioink>, so a build using N combinations needs N entries, not one entry with a range."
+      ]
+    }
+  ],
+  "defaults": {
+    "toolpath_dialect": "gcode-marlin",
+    "iso52900": "MEX",
+    "sterility_prompt": "If the blue-light disinfection module was used, record it in sterility_method rather than leaving the field as aseptic-assembly."
+  },
+  "maintainer": "Brinter AM Technologies Oy",
+  "status": "compiled-from-public-sources"
+}

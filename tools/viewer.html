@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3MF Bio Viewer</title>
+<!--
+  3MF Bio Viewer - single file, no build step, no server, no upload.
+  Everything happens in the browser; the package never leaves the machine.
+
+  The point of this viewer is NOT to be a 3D preview. Plenty of those exist. The point is
+  that a package carries a set of instructions and constraints, and the person who receives
+  it has to be able to follow them. So the default tab is RUN SHEET, not geometry: an
+  ordered operator checklist derived from the package itself, with the open items and
+  acceptance criteria in the places where they bite.
+
+  Drop a .3mf on the window, or use the file picker.
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root{
+    --bg:#12131a; --panel:#1a1c26; --line:#2b2e3d; --ink:#e6e8f0; --dim:#9aa0b4;
+    --accent:#7dd3c0; --warn:#e8b04b; --bad:#e06c62; --ok:#7fc98a;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  header{padding:10px 18px;border-bottom:1px solid var(--line);display:flex;
+         align-items:center;gap:16px;flex-wrap:wrap;background:var(--panel)}
+  header h1{font-size:15px;margin:0;font-weight:600;letter-spacing:.02em}
+  header .sub{color:var(--dim);font-size:12.5px}
+  .tabs{display:flex;gap:2px;margin-left:auto}
+  .tab{padding:6px 14px;border:1px solid var(--line);background:transparent;color:var(--dim);
+       cursor:pointer;font-size:13px;border-radius:4px;font-family:inherit}
+  .tab.on{background:var(--accent);color:#0d1117;border-color:var(--accent);font-weight:600}
+  main{flex:1;overflow:hidden;position:relative}
+  .view{display:none;height:100%;overflow-y:auto;padding:20px 24px 60px}
+  .view.on{display:block}
+  #geo{padding:0}
+  #canvasWrap{width:100%;height:100%;position:relative}
+  #drop{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+        flex-direction:column;gap:14px;background:var(--bg);z-index:20;text-align:center;padding:24px}
+  #drop.hide{display:none}
+  #drop p{max-width:44ch;color:var(--dim);margin:0}
+  .btn{padding:9px 18px;border:1px solid var(--accent);background:transparent;
+       color:var(--accent);border-radius:5px;cursor:pointer;font-size:14px;font-family:inherit}
+  .btn:hover{background:var(--accent);color:#0d1117}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.09em;color:var(--accent);
+     margin:26px 0 10px;font-weight:600}
+  h2:first-child{margin-top:0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:7px;
+        padding:14px 16px;margin-bottom:10px}
+  .card.blocking{border-left:3px solid var(--bad)}
+  .card.material{border-left:3px solid var(--warn)}
+  .card.minor{border-left:3px solid var(--dim)}
+  .card.done{border-left:3px solid var(--ok);opacity:.72}
+  .step{display:flex;gap:14px;align-items:flex-start}
+  .num{flex:0 0 26px;height:26px;border-radius:50%;background:var(--line);display:flex;
+       align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--dim)}
+  .step.blocked .num{background:var(--bad);color:#fff}
+  .ttl{font-weight:600;margin-bottom:3px}
+  .meta{color:var(--dim);font-size:13px}
+  code,.mono{font-family:var(--mono);font-size:12.5px}
+  table{border-collapse:collapse;width:100%;font-size:13px;margin-top:4px}
+  th,td{text-align:left;padding:5px 10px 5px 0;border-bottom:1px solid var(--line);
+        vertical-align:top}
+  th{color:var(--dim);font-weight:500;font-size:12px;text-transform:uppercase;
+     letter-spacing:.05em}
+  .pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;
+        border:1px solid var(--line);color:var(--dim);margin-left:6px;white-space:nowrap}
+  .pill.est{border-color:var(--warn);color:var(--warn)}
+  .pill.der{border-color:var(--accent);color:var(--accent)}
+  .pill.meas{border-color:var(--ok);color:var(--ok)}
+  .pill.bad{border-color:var(--bad);color:var(--bad)}
+  .banner{padding:11px 16px;border-radius:6px;margin-bottom:16px;font-size:13.5px;
+          border:1px solid var(--line);background:var(--panel)}
+  .banner.warn{border-color:var(--warn)}
+  .banner.bad{border-color:var(--bad)}
+  .tl{border-left:2px solid var(--line);margin-left:11px;padding-left:20px}
+  .tl .card{position:relative}
+  .tl .card::before{content:"";position:absolute;left:-27px;top:18px;width:10px;height:10px;
+                    border-radius:50%;background:var(--accent)}
+  .empty{color:var(--dim);font-style:italic}
+  .fine{color:var(--dim);font-size:12.5px;margin-top:8px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>3MF Bio Viewer</h1>
+  <span class="sub" id="pkgname">no package loaded</span>
+  <div class="tabs">
+    <button class="tab on" data-v="run">Run sheet</button>
+    <button class="tab" data-v="gaps">Open items</button>
+    <button class="tab" data-v="dossier">Dossier</button>
+    <button class="tab" data-v="mat">Maturation</button>
+    <button class="tab" data-v="geo">Geometry</button>
+  </div>
+</header>
+
+<main>
+  <div id="drop">
+    <p><strong>Drop a <code>.3mf</code> here</strong></p>
+    <p>Everything runs in your browser. Nothing is uploaded anywhere.</p>
+    <button class="btn" onclick="document.getElementById('f').click()">Choose a file</button>
+    <input id="f" type="file" accept=".3mf,.zip" hidden>
+  </div>
+  <div class="view on" id="v-run"></div>
+  <div class="view" id="v-gaps"></div>
+  <div class="view" id="v-dossier"></div>
+  <div class="view" id="v-mat"></div>
+  <div class="view" id="v-geo"><div id="canvasWrap"></div></div>
+</main>
+
+<script>
+const BIO = "urn:3mf-bio:2026-07";
+const CORE = "http://schemas.microsoft.com/3dmanufacturing/core/2015/02";
+let DOC = null;
+
+const $  = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const bio = (root, tag) => [...root.getElementsByTagNameNS(BIO, tag)];
+const core = (root, tag) => [...root.getElementsByTagNameNS(CORE, tag)];
+const ba = (el, n) => el?.getAttributeNS(BIO, n) ?? el?.getAttribute("b:" + n);
+
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
+  document.querySelectorAll(".tab").forEach(x => x.classList.remove("on"));
+  document.querySelectorAll(".view").forEach(x => x.classList.remove("on"));
+  t.classList.add("on");
+  $("#v-" + t.dataset.v).classList.add("on");
+  if (t.dataset.v === "geo") resize();
+});
+
+document.body.addEventListener("dragover", e => e.preventDefault());
+document.body.addEventListener("drop", e => {
+  e.preventDefault();
+  if (e.dataTransfer.files[0]) load(e.dataTransfer.files[0]);
+});
+$("#f").onchange = e => e.target.files[0] && load(e.target.files[0]);
+
+async function load(file) {
+  try {
+    const zip = await JSZip.loadAsync(file);
+    let name = Object.keys(zip.files).find(n => /3dmodel\.model$/i.test(n));
+    if (!name) throw new Error("no /3D/3dmodel.model inside this package");
+    const xml = await zip.file(name).async("string");
+    DOC = new DOMParser().parseFromString(xml, "application/xml");
+    if (DOC.querySelector("parsererror")) throw new Error("the model part is not valid XML");
+    $("#pkgname").textContent = file.name;
+    $("#drop").classList.add("hide");
+    render();
+  } catch (err) {
+    alert("Could not read that package.\n\n" + err.message);
+  }
+}
+
+/* ---------------------------------------------------------------- shared reads */
+function meta(name) {
+  return core(DOC, "metadata").find(m => m.getAttribute("name") === name)?.textContent || "";
+}
+function openItems() {
+  return bio(DOC, "openitem").map(o => ({
+    key: o.getAttribute("key"), kind: o.getAttribute("kind"),
+    sev: o.getAttribute("severity"), status: o.getAttribute("status"),
+    summary: o.getAttribute("summary"), action: o.getAttribute("action"),
+    owner: o.getAttribute("owner"), resolution: o.getAttribute("resolution"),
+    params: bio(o, "affects").map(a => a.getAttribute("paramname")).filter(Boolean)
+  }));
+}
+function provPill(p) {
+  const cls = p === "measured" ? "meas" : p === "derived" ? "der"
+            : p === "estimated" ? "est" : "";
+  return `<span class="pill ${cls}">${esc(p || "?")}</span>`;
+}
+function paramRow(p) {
+  const v = p.getAttribute("measured") || p.getAttribute("setpoint") || "";
+  const blank = v === "";
+  return `<tr><td class="mono">${esc(p.getAttribute("name"))}</td>
+    <td class="mono">${blank ? '<span class="pill bad">not set</span>' : esc(v)}
+        ${esc(p.getAttribute("unit") || "")}</td>
+    <td>${provPill(p.getAttribute("provenance"))}</td>
+    <td class="meta">${esc(p.getAttribute("method") || p.getAttribute("note") || "")}</td></tr>`;
+}
+
+/* ---------------------------------------------------------------- RUN SHEET
+   The reason this viewer exists. An ordered operator checklist, assembled from the
+   package, with the constraints attached to the step where they matter. */
+function renderRun() {
+  const items = openItems();
+  const blocking = items.filter(i => i.sev === "blocking" && i.status !== "resolved");
+  const byParam = {};
+  items.forEach(i => i.params.forEach(p => (byParam[p] ||= []).push(i)));
+
+  let h = "";
+  h += `<div class="banner ${blocking.length ? "bad" : ""}">
+    <strong>${esc(meta("Title") || "Untitled build")}</strong> &nbsp;
+    <span class="meta">3MF Bio ${esc(meta("b:SpecVersion") || "?")} &middot;
+    ${esc(meta("b:Conformance") || "unclassified")}</span><br>
+    ${blocking.length
+      ? `<span style="color:var(--bad)">${blocking.length} blocking open item(s).</span>
+         This build is <strong>not reproducible as recorded</strong>. Read the Open items tab
+         before starting.`
+      : `No blocking open items. Note that this means the record is complete and internally
+         consistent &mdash; <strong>not</strong> that it is correct. Nothing has checked
+         whether these values are true.`}
+  </div>`;
+
+  let n = 0;
+  const step = (title, body, blocked) => {
+    n++;
+    return `<div class="card ${blocked ? "blocking" : ""}"><div class="step ${blocked ? "blocked" : ""}">
+      <div class="num">${n}</div><div style="flex:1">
+      <div class="ttl">${title}</div>${body}</div></div></div>`;
+  };
+
+  // 1. materials
+  const subs = bio(DOC, "substance");
+  h += `<h2>Before you start</h2>`;
+  h += step("Obtain and verify materials",
+    `<table><tr><th>Substance</th><th>Role</th><th>Identifier</th><th>Lot</th></tr>` +
+    subs.map(s => {
+      const id = bio(s, "identity")[0], g = bio(s, "grade")[0];
+      const cas = id?.getAttribute("casrn"), ik = id?.getAttribute("inchikey");
+      return `<tr><td>${esc(s.getAttribute("name"))}</td>
+        <td class="meta">${esc(s.getAttribute("role"))}</td>
+        <td class="mono">${cas ? "CAS " + esc(cas) : ik ? esc(ik)
+          : '<span class="pill bad">unidentified</span>'}</td>
+        <td class="mono">${esc(g?.getAttribute("lot") || "—")}</td></tr>`;
+    }).join("") + `</table>`,
+    subs.some(s => !bio(s, "identity")[0]?.getAttribute("casrn") &&
+                   !bio(s, "grade")[0]?.getAttribute("supplier")));
+
+  // 2. cells
+  const pops = bio(DOC, "cellpopulation");
+  if (pops.length) h += step("Prepare cells", pops.map(p => {
+    const o = bio(p, "origin")[0], c = bio(p, "culture")[0];
+    const myco = bio(p, "authentication").find(a => a.getAttribute("assay") === "mycoplasma");
+    const res = (myco?.getAttribute("result") || "").toLowerCase();
+    const bad = /positive|contamin|fail/.test(res);
+    const pass = bio(c, "param").find(x => x.getAttribute("name") === "passage_at_print");
+    return `<div><strong>${esc(p.getAttribute("name"))}</strong>
+      <span class="meta">${esc(o?.getAttribute("kind") || "")}
+      ${o?.getAttribute("rrid") ? " · " + esc(o.getAttribute("rrid")) : ""}</span><br>
+      <span class="meta">Passage at print:</span>
+      <span class="mono">${esc(pass?.getAttribute("measured") || "not recorded")}</span>
+      &nbsp;<span class="meta">Antibiotics:</span>
+      <span class="mono">${esc(c?.getAttribute("antibiotics") || "not stated")}</span><br>
+      <span class="meta">Mycoplasma:</span>
+      <span class="pill ${bad ? "bad" : res ? "meas" : ""}">${esc(myco?.getAttribute("result") || "no record")}</span>
+      ${bad ? '<div class="fine" style="color:var(--bad)">A contaminated population invalidates everything downstream. Do not proceed.</div>' : ""}
+    </div>`;
+  }).join("<hr style='border:0;border-top:1px solid var(--line);margin:10px 0'>"),
+    pops.some(p => {
+      const m = bio(p, "authentication").find(a => a.getAttribute("assay") === "mycoplasma");
+      return !m || /positive|contamin|fail/i.test(m.getAttribute("result") || "");
+    }));
+
+  // 3. calibration
+  const cals = bio(DOC, "calibration");
+  if (cals.length) {
+    h += step("Confirm calibration", cals.map(c =>
+      `<div class="meta">Performed ${esc(c.getAttribute("performed") || "—")}
+        by ${esc(c.getAttribute("operator") || "—")}
+        ${c.getAttribute("standard") ? " · " + esc(c.getAttribute("standard")) : ""}</div>
+      <table><tr><th>Test</th><th>Acceptance</th><th>Measured</th><th>Outcome</th></tr>` +
+      bio(c, "test").map(t => {
+        const o = t.getAttribute("outcome");
+        return `<tr><td class="mono">${esc(t.getAttribute("name"))}</td>
+          <td class="meta">${esc(t.getAttribute("acceptance") || "—")}</td>
+          <td class="mono">${esc(t.getAttribute("measured") || "—")}</td>
+          <td><span class="pill ${o === "pass" ? "meas" : o === "fail" ? "bad" : "est"}">${esc(o)}</span></td></tr>`;
+      }).join("") + `</table>`,
+      bio(DOC, "test").some(t => t.getAttribute("outcome") === "fail"));
+  } else {
+    h += step("Confirm calibration",
+      `<div class="meta" style="color:var(--warn)">No calibration record in this package.
+       The process parameters below are not tied to a machine whose behaviour was checked.</div>`,
+      true);
+  }
+
+  // 4. heads
+  const heads = bio(DOC, "printhead");
+  if (heads.length) h += step("Load printheads",
+    `<table><tr><th>Tool</th><th>Head</th><th>Drive</th><th>Nozzle</th></tr>` +
+    heads.map(hd => {
+      const nz = bio(hd, "nozzle")[0], cx = bio(hd, "coaxial")[0];
+      let noz = `${esc(nz?.getAttribute("geometry") || "?")} ·
+                 ${esc(nz?.getAttribute("innerdiameter") || "?")} ${esc(nz?.getAttribute("unit") || "")}`;
+      if (cx) noz += `<div class="fine">coaxial → ${esc(cx.getAttribute("product"))}: ` +
+        bio(cx, "channel").map(ch =>
+          `${esc(ch.getAttribute("role"))}=${esc(ch.getAttribute("content"))}`).join(", ") + `</div>`;
+      return `<tr><td class="mono">${esc(hd.getAttribute("tool") || "—")}</td>
+        <td>${esc(hd.getAttribute("name"))}</td>
+        <td class="meta">${esc(hd.getAttribute("drive"))}</td><td>${noz}</td></tr>`;
+    }).join("") + `</table>`, false);
+
+  // 5. print
+  bio(DOC, "process").forEach(pr => {
+    const ps = bio(pr, "parameters")[0];
+    const rows = ps ? bio(ps, "param") : [];
+    const unset = rows.filter(p => !(p.getAttribute("measured") || p.getAttribute("setpoint")));
+    h += step(`Print — ${esc(pr.getAttribute("modality"))}`,
+      `<table><tr><th>Parameter</th><th>Value</th><th>Origin</th><th>Method / note</th></tr>` +
+      rows.map(paramRow).join("") + `</table>` +
+      (unset.length ? `<div class="fine" style="color:var(--bad)">${unset.length} parameter(s)
+        have no value. You cannot follow this run sheet without them.</div>` : ""),
+      unset.length > 0);
+    const tp = bio(pr, "toolpath")[0];
+    if (tp) h += step("Load toolpath",
+      `<div class="mono">${esc(tp.getAttribute("path"))}</div>
+       <div class="meta">dialect ${esc(tp.getAttribute("dialect"))}</div>
+       <div class="fine">Verify the checksum before running. A recorded hash nobody checks
+       is decoration.</div>
+       <div class="mono fine">${esc((tp.getAttribute("checksum") || "").slice(0, 40))}…</div>` +
+      (bio(tp, "cmd").length ? `<table><tr><th>Code</th><th>Means</th></tr>` +
+        bio(tp, "cmd").map(c => `<tr><td class="mono">${esc(c.getAttribute("code"))}</td>
+          <td>${esc(c.getAttribute("means"))}</td></tr>`).join("") + `</table>
+        <div class="fine">M106 is a cooling fan on one machine and a crosslinking lamp on
+        another. Confirm this mapping against your firmware.</div>` : ""), false);
+  });
+
+  // 6. maturation summary
+  const stages = bio(DOC, "stage");
+  if (stages.length) h += step("Then follow the maturation schedule",
+    `<div class="meta">${stages.length} stage(s) — see the Maturation tab for the full
+     schedule and the assay timepoints.</div>`, false);
+
+  $("#v-run").innerHTML = h;
+}
+
+/* ---------------------------------------------------------------- OPEN ITEMS */
+function renderGaps() {
+  const items = openItems();
+  const order = { blocking: 0, material: 1, minor: 2 };
+  items.sort((a, b) => (a.status === "resolved") - (b.status === "resolved") ||
+                       order[a.sev] - order[b.sev]);
+  let h = `<div class="banner">These are the things the author of this package knew they did
+    not know. A gap recorded here is worth more than a number invented to fill it &mdash;
+    that is the whole design. What matters is which ones block <em>your</em> use.</div>`;
+  if (!items.length) h += `<p class="empty">No open items recorded.</p>`;
+  h += items.map(i => `<div class="card ${i.status === "resolved" ? "done" : i.sev}">
+    <div class="ttl">${esc(i.summary)}
+      <span class="pill">${esc(i.sev)}</span>
+      <span class="pill">${esc(i.status)}</span></div>
+    <div class="meta"><strong>To close it:</strong> ${esc(i.action)}</div>
+    ${i.resolution ? `<div class="meta" style="color:var(--ok)"><strong>Resolved:</strong>
+      ${esc(i.resolution)}</div>` : ""}
+    ${i.owner ? `<div class="fine">Owner: ${esc(i.owner)}</div>` : ""}
+    ${i.params.length ? `<div class="fine mono">affects: ${esc(i.params.join(", "))}</div>` : ""}
+    <div class="fine mono">${esc(i.key)}</div></div>`).join("");
+  $("#v-gaps").innerHTML = h;
+}
+
+/* ---------------------------------------------------------------- DOSSIER */
+function renderDossier() {
+  let h = "";
+  const reg = bio(DOC, "regulatory")[0];
+  if (reg) {
+    h += `<h2>Regulatory context</h2>
+      <div class="banner warn">This records what the author <em>considered</em>. It is not a
+      compliance claim, and this format asserts no thresholds. Read it as a starting point for
+      your own audit.</div>
+      <div class="card"><div class="meta">Intended use:
+      <strong>${esc(reg.getAttribute("intendeduse"))}</strong></div>
+      <table><tr><th>Region</th><th>Instrument</th><th>Determination</th></tr>` +
+      bio(reg, "jurisdiction").map(j => {
+        const d = j.getAttribute("determination");
+        return `<tr><td>${esc(j.getAttribute("region"))}</td>
+          <td class="meta">${esc(j.getAttribute("instrument"))}</td>
+          <td><span class="pill ${d === "confirmed-by-authority" ? "meas"
+            : d === "undetermined" ? "bad" : "est"}">${esc(d)}</span></td></tr>`;
+      }).join("") + `</table></div>`;
+    const stds = bio(reg, "standardref");
+    if (stds.length) h += `<div class="card"><div class="ttl">Standards referenced</div>
+      <table><tr><th>Standard</th><th>Applies at</th><th>Status</th></tr>` +
+      stds.map(s => `<tr><td class="mono">${esc(s.getAttribute("stdno"))}</td>
+        <td class="meta">${esc(s.getAttribute("applies") || "—")}</td>
+        <td>${esc(s.getAttribute("status") || "—")}</td></tr>`).join("") + `</table>
+      <div class="fine">Referenced as identifiers. Nothing here is reproduced, interpreted or
+      certified against.</div></div>`;
+  }
+
+  h += `<h2>Formulations</h2>`;
+  bio(DOC, "bioink").forEach(ink => {
+    const cl = bio(ink, "cellload")[0], rh = bio(ink, "rheology")[0];
+    h += `<div class="card"><div class="ttl">${esc(ink.getAttribute("name"))}
+      <span class="pill">${esc(ink.getAttribute("class"))}</span></div>
+      ${cl ? `<div class="meta">Cell density:
+        <span class="mono">${esc(cl.getAttribute("density") || "field-driven")}
+        ${esc(cl.getAttribute("unit") || "")}</span> ${provPill(cl.getAttribute("provenance"))}</div>` : ""}
+      ${rh ? `<div class="meta">Rheology model:
+        <span class="mono">${esc(rh.getAttribute("model"))}</span></div>
+        <table>${bio(rh, "param").map(paramRow).join("")}</table>` : ""}
+    </div>`;
+  });
+
+  const ev = bio(DOC, "reference");
+  if (ev.length) {
+    h += `<h2>Evidence</h2><div class="card"><table>
+      <tr><th>Key</th><th>Kind</th><th>Identifier</th><th>Grade</th></tr>` +
+      ev.map(r => {
+        const doi = r.getAttribute("doi"), url = r.getAttribute("url");
+        const id = doi ? `<a href="https://doi.org/${esc(doi)}" target="_blank"
+            rel="noopener" style="color:var(--accent)">${esc(doi)}</a>`
+          : r.getAttribute("stdno") ? esc(r.getAttribute("stdno"))
+          : url ? `<a href="${esc(url)}" target="_blank" rel="noopener"
+            style="color:var(--accent)">link</a>` : "—";
+        return `<tr><td class="mono">${esc(r.getAttribute("key"))}</td>
+          <td class="meta">${esc(r.getAttribute("kind"))}</td><td class="mono">${id}</td>
+          <td>${esc(r.getAttribute("grade") || "—")}</td></tr>`;
+      }).join("") + `</table><div class="fine">Grades are the author's own assessment:
+      A consensus standard, B peer-reviewed primary, C inferred, D preprint, E vendor,
+      F internal.</div></div>`;
+  }
+  $("#v-dossier").innerHTML = h || `<p class="empty">No dossier content.</p>`;
+}
+
+/* ---------------------------------------------------------------- MATURATION */
+function renderMat() {
+  const stages = bio(DOC, "stage");
+  const chars = bio(DOC, "characterization");
+  let h = "";
+  if (!stages.length && !chars.length) {
+    $("#v-mat").innerHTML = `<p class="empty">This package records nothing after the print.
+      For a cell-laden construct that is usually the more consequential half.</p>`;
+    return;
+  }
+  if (stages.length) {
+    h += `<h2>Culture schedule</h2><div class="tl">`;
+    stages.forEach(s => {
+      const br = bio(s, "bioreactor")[0];
+      h += `<div class="card"><div class="ttl">${esc(s.getAttribute("name"))}
+        <span class="pill">${esc(s.getAttribute("from"))} → ${esc(s.getAttribute("to"))}</span>
+        <span class="pill">${esc(s.getAttribute("culture"))}</span></div>
+        ${s.getAttribute("purpose") ? `<div class="meta">${esc(s.getAttribute("purpose"))}</div>` : ""}
+        ${br && br.getAttribute("kind") !== "none"
+          ? `<div class="meta">Bioreactor: ${esc(br.getAttribute("kind"))}</div>
+             <table>${bio(br, "param").map(paramRow).join("")}</table>` : ""}
+        ${bio(s, "stimulation").map(st => `<div class="fine"><strong>Stimulation:</strong>
+          ${esc(st.getAttribute("mode"))}
+          ${st.getAttribute("dutycycle") ? " · " + esc(st.getAttribute("dutycycle")) : ""}</div>
+          <table>${bio(st, "param").map(paramRow).join("")}</table>`).join("")}
+        ${bio(s, "medium").map(m => `<div class="fine">Medium:
+          ${esc(m.getAttribute("name"))} · exchange
+          ${esc(m.getAttribute("exchangeinterval") || "not stated")}</div>`).join("")}
+      </div>`;
+    });
+    h += `</div>`;
+  }
+  if (chars.length) {
+    h += `<h2>Assay schedule</h2>`;
+    chars.forEach(c => bio(c, "assay").forEach(a => {
+      const rs = bio(a, "reading");
+      h += `<div class="card"><div class="ttl">${esc(a.getAttribute("name"))}
+        <span class="pill">${esc(a.getAttribute("domain"))}</span>
+        ${a.getAttribute("destructive") === "true"
+          ? '<span class="pill bad">destructive</span>' : ""}</div>
+        <div class="meta">${esc(a.getAttribute("method"))}</div>
+        ${a.getAttribute("acceptance")
+          ? `<div class="fine">Acceptance: ${esc(a.getAttribute("acceptance"))}</div>` : ""}
+        <table><tr><th>Timepoint</th><th>Value</th><th>n</th><th>Origin</th></tr>` +
+        rs.map(r => `<tr><td class="mono">${esc(r.getAttribute("timepoint"))}</td>
+          <td class="mono">${r.getAttribute("value")
+            ? esc(r.getAttribute("value")) + " " + esc(a.getAttribute("unit") || "")
+            : '<span class="pill bad">not measured</span>'}</td>
+          <td class="mono">${esc(r.getAttribute("n") || "—")}</td>
+          <td>${provPill(r.getAttribute("provenance"))}</td></tr>`).join("") + `</table>
+        ${a.getAttribute("destructive") === "true" && rs.length > 1
+          ? `<div class="fine" style="color:var(--warn)">${rs.length} timepoints on a
+             destructive assay: each consumes its own specimen.</div>` : ""}
+      </div>`;
+    }));
+  }
+  $("#v-mat").innerHTML = h;
+}
+
+/* ---------------------------------------------------------------- GEOMETRY */
+let scene, cam, rend, ctrls = { rx: -0.5, ry: 0.6, d: 3, tx: 0, ty: 0 };
+function renderGeo() {
+  const wrap = $("#canvasWrap");
+  wrap.innerHTML = "";
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x12131a);
+  cam = new THREE.PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 0.01, 5000);
+  rend = new THREE.WebGLRenderer({ antialias: true });
+  rend.setSize(wrap.clientWidth, wrap.clientHeight);
+  rend.setPixelRatio(devicePixelRatio);
+  wrap.appendChild(rend.domElement);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+  const dl = new THREE.DirectionalLight(0xffffff, 0.75); dl.position.set(1, 1.4, 1);
+  scene.add(dl);
+
+  const ROLE = { parenchyma: 0xc05b4d, vasculature: 0x4d7fc0, sacrificial: 0x9aa0b4,
+                 support: 0x6b7280, "test-coupon": 0xe8b04b, interface: 0x7dd3c0,
+                 fiducial: 0xffffff };
+  const box = new THREE.Box3();
+  core(DOC, "object").forEach(o => {
+    const vs = core(o, "vertex"), ts = core(o, "triangle");
+    if (!vs.length || !ts.length) return;
+    const pos = [];
+    const pts = vs.map(v => [+v.getAttribute("x"), +v.getAttribute("y"), +v.getAttribute("z")]);
+    ts.forEach(t => ["v1", "v2", "v3"].forEach(k => {
+      const p = pts[+t.getAttribute(k)];
+      if (p) pos.push(p[0], p[1], p[2]);
+    }));
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    g.computeVertexNormals();
+    const role = ba(o, "regionrole") || "parenchyma";
+    const m = new THREE.Mesh(g, new THREE.MeshPhongMaterial({
+      color: ROLE[role] ?? 0x7dd3c0, flatShading: true,
+      transparent: role === "sacrificial" || role === "support", opacity: 0.45,
+      side: THREE.DoubleSide }));
+    scene.add(m);
+    g.computeBoundingBox(); box.union(g.boundingBox);
+  });
+
+  if (!box.isEmpty()) {
+    const c = box.getCenter(new THREE.Vector3());
+    scene.children.forEach(o => o.isMesh && o.position.sub(c));
+    ctrls.d = box.getSize(new THREE.Vector3()).length() * 1.6 || 3;
+  }
+  const el = rend.domElement;
+  let drag = false, lx = 0, ly = 0;
+  el.onpointerdown = e => { drag = true; lx = e.clientX; ly = e.clientY; };
+  el.onpointerup = () => drag = false;
+  el.onpointerleave = () => drag = false;
+  el.onpointermove = e => {
+    if (!drag) return;
+    ctrls.ry += (e.clientX - lx) * 0.008;
+    ctrls.rx += (e.clientY - ly) * 0.008;
+    lx = e.clientX; ly = e.clientY;
+  };
+  el.onwheel = e => { e.preventDefault(); ctrls.d *= e.deltaY > 0 ? 1.1 : 0.9; };
+  (function tick() {
+    requestAnimationFrame(tick);
+    cam.position.set(ctrls.d * Math.cos(ctrls.rx) * Math.sin(ctrls.ry),
+                     ctrls.d * Math.sin(ctrls.rx),
+                     ctrls.d * Math.cos(ctrls.rx) * Math.cos(ctrls.ry));
+    cam.lookAt(0, 0, 0);
+    rend.render(scene, cam);
+  })();
+}
+function resize() {
+  const w = $("#canvasWrap");
+  if (rend && w.clientWidth) {
+    rend.setSize(w.clientWidth, w.clientHeight);
+    cam.aspect = w.clientWidth / w.clientHeight;
+    cam.updateProjectionMatrix();
+  }
+}
+addEventListener("resize", resize);
+
+function render() {
+  renderRun(); renderGaps(); renderDossier(); renderMat(); renderGeo();
+}
+</script>
+</body>
+</html>

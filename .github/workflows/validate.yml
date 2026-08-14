@@ -1,0 +1,194 @@
+name: validate
+
+# Every push and PR re-runs the full conformance chain. A specification whose example
+# does not validate is a specification nobody can trust.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install lxml
+
+      - name: Versions agree across every file that states one
+        run: |
+          python3 - <<'PY'
+          import re, sys
+          def grab(path, pat):
+              m = re.search(pat, open(path).read(), re.M)
+              return m.group(1) if m else None
+          found = {
+              "spec/validate_bio.py": grab("spec/validate_bio.py", r'SPEC_VERSION = "([^"]+)"'),
+              "CITATION.cff": grab("CITATION.cff", r'^version: (\S+)'),
+              "spec/3MF Bio Extension.md": grab("spec/3MF Bio Extension.md",
+                                                r'\*\*Version\*\* \| (\S+)'),
+              "CHANGELOG.md": grab("CHANGELOG.md", r'^## \[([0-9.]+)\]'),
+              "examples": grab("examples/3D/3dmodel.model", r'b:SpecVersion">([^<]+)'),
+              "examples-extrusion": grab("examples-extrusion/3D/3dmodel.model",
+                                         r'b:SpecVersion">([^<]+)'),
+          }
+          if len(set(found.values())) != 1:
+              for k, v in found.items():
+                  print(f"  {v}  {k}")
+              sys.exit("version drift: the files above disagree")
+          print("all versions agree:", next(iter(found.values())))
+          PY
+
+      - name: XSD compiles
+        run: |
+          python3 - <<'PY'
+          from lxml import etree
+          etree.XMLSchema(etree.parse("spec/bio.libxml.xsd"))
+          print("bio.libxml.xsd compiles")
+          PY
+
+      - name: Generated schema variant is in sync with the canonical one
+        run: |
+          python3 - <<'PY'
+          import sys
+          canon = open("spec/bio.xsd").read()
+          gen   = open("spec/bio.libxml.xsd").read()
+          expect = canon.split("\n", 1)[1].replace('maxOccurs="2147483647"', 'maxOccurs="unbounded"')
+          if not gen.endswith(expect):
+              sys.exit("bio.libxml.xsd is stale; regenerate it from bio.xsd")
+          print("schema variant in sync")
+          PY
+
+      - name: Bio resources validate against the XSD
+        run: |
+          python3 spec/validate_schema.py examples
+          python3 spec/validate_schema.py examples-extrusion
+
+      - name: Package rules (errors fail the build)
+        run: |
+          python3 spec/validate_bio.py examples
+          python3 spec/validate_bio.py examples-extrusion
+
+      - name: Schematron MUST-level rules
+        run: |
+          python3 - <<'PY'
+          import sys
+          from lxml import etree, isoschematron
+          sch = isoschematron.Schematron(etree.parse("spec/bio.sch"))
+          for pkg in ("examples", "examples-extrusion"):
+              if not sch.validate(etree.parse(f"{pkg}/3D/3dmodel.model")):
+                  for e in sch.error_log:
+                      print(e.message)
+                  sys.exit(f"Schematron assertions failed for {pkg}")
+          print("Schematron assertions pass for both exemplars")
+          PY
+
+      - name: Hashed files are protected from line-ending conversion
+        run: |
+          python3 - <<'PY'
+          import hashlib, re, subprocess, sys, glob, os
+          # Rule T4 hashes the toolpath file. If Git ever converts LF to CRLF on checkout the
+          # bytes change and the checksum breaks, so confirm .gitattributes still disables
+          # conversion for every file a package hashes.
+          bad = []
+          for model in glob.glob("examples*/3D/3dmodel.model"):
+              pkg = model.split("/")[0]
+              xml = open(model).read()
+              for m in re.finditer(r'path="([^"]+)"[^>]*checksum="sha256:([0-9a-f]+)"', xml):
+                  rel, recorded = m.group(1).lstrip("/"), m.group(2)
+                  path = os.path.join(pkg, rel)
+                  if not os.path.exists(path):
+                      continue
+                  attrs = subprocess.run(["git", "check-attr", "text", "--", path],
+                                         capture_output=True, text=True).stdout
+                  if "text: unset" not in attrs:
+                      bad.append(f"{path}: line-ending conversion is NOT disabled ({attrs.strip()})")
+                  actual = hashlib.sha256(open(path, "rb").read()).hexdigest()
+                  if actual != recorded:
+                      bad.append(f"{path}: checksum mismatch")
+          for b in bad:
+              print(b)
+          if bad:
+              sys.exit("hashed files are not protected; a Windows clone would fail rule T4")
+          print("all checksummed files are protected from conversion and hash correctly")
+          PY
+
+      - name: Full verification (single gate)
+        run: python3 verify.py --ci
+
+      - name: Conformance matrix (both engines, fault injection)
+        run: python3 spec/conformance_tests.py
+
+      - name: Modality corpus - every required set must be satisfiable
+        run: |
+          python3 spec/make_conformance_corpus.py
+          python3 - <<'PY'
+          import glob, os, subprocess, sys
+          from lxml import etree, isoschematron
+          sch = isoschematron.Schematron(etree.parse("spec/bio.sch"))
+          bad = 0
+          for d in sorted(glob.glob("conformance/*/")):
+              name = os.path.basename(d.rstrip("/"))
+              out = subprocess.run([sys.executable, "spec/validate_bio.py", d],
+                                   capture_output=True, text=True).stdout
+              n = int(out.split("error(s)")[0].strip().split("\n")[-1])
+              ok = sch.validate(etree.parse(os.path.join(d, "3D", "3dmodel.model")))
+              if n or not ok:
+                  bad += 1
+                  print(f"FAIL {name}: {n} errors, schematron={ok}")
+                  print(out)
+          if bad:
+              sys.exit(f"{bad} modality template(s) do not validate")
+          print("all modality templates validate in both engines")
+          PY
+
+      - name: Round-trip preservation
+        run: python3 spec/roundtrip_test.py
+
+      - name: Integrator - questionnaire generates, tool always emits, output always validates
+        run: |
+          python3 tools/questionnaire.py --profile brinter
+          python3 tools/questionnaire.py --profile brinter --head visco-bio --format json > /dev/null
+          python3 tools/test_tools.py
+
+      - name: Viewer is well-formed and self-contained
+        run: |
+          python3 - <<'PY'
+          import re, sys
+          h = open("tools/viewer.html").read()
+          for need in ("<!DOCTYPE html>", "https://3mfbio.com/ns/bio/2026/07", "JSZip", "three.min.js"):
+              assert need in h, f"viewer.html missing {need}"
+          # the viewer must not post the package anywhere
+          for bad in ("fetch(", "XMLHttpRequest", "navigator.sendBeacon", "action="):
+              assert bad not in h, f"viewer.html contains {bad!r}; it must stay local-only"
+          print("viewer.html ok, no network egress")
+          PY
+
+      - name: Build and validate the .3mf package
+        run: |
+          python3 - <<'PY'
+          import os, zipfile
+          src, out = "examples", "examples-package.3mf"
+          with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+              z.write(os.path.join(src, "[Content_Types].xml"), "[Content_Types].xml")
+              for root, _, files in os.walk(src):
+                  for f in sorted(files):
+                      p = os.path.join(root, f)
+                      rel = os.path.relpath(p, src).replace(os.sep, "/")
+                      if rel != "[Content_Types].xml":
+                          z.write(p, rel)
+          print("built", out)
+          PY
+          python3 spec/validate_bio.py examples-package.3mf
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: example-package
+          path: examples-package.3mf

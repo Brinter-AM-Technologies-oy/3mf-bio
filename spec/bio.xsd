@@ -1,0 +1,1454 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="https://3mfbio.com/ns/bio/2026/07"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:core="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"
+	targetNamespace="https://3mfbio.com/ns/bio/2026/07"
+	elementFormDefault="unqualified" attributeFormDefault="unqualified" blockDefault="#all">
+	<xs:import namespace="http://www.w3.org/XML/1998/namespace"
+		schemaLocation="http://www.w3.org/2001/xml.xsd"/>
+	<xs:annotation>
+		<xs:documentation><![CDATA[   Schema notes:
+
+  Items within this schema follow a simple naming convention of appending a prefix indicating the type of element for references:
+
+  Unprefixed: Element names
+  CT_: Complex types
+  ST_: Simple types
+
+  Bio extension notes:
+
+  Every <param> carries a mandatory provenance attribute. Where provenance is "cited" or
+  "derived", the parameter MUST reference an <evidence> resource. This constraint cannot be
+  expressed in XSD 1.0 and is enforced by consumers; see Chapter 8 of the specification and
+  the reference validator.
+
+  An attribute present with an empty value denotes "declared but not yet known" and is
+  distinct from an absent attribute. Constrained simple types therefore union with the
+  zero-length string.
+  ]]></xs:documentation>
+	</xs:annotation>
+
+	<!-- Complex Types -->
+
+	<xs:complexType name="CT_Resources">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="2147483647">
+				<xs:element ref="evidence" minOccurs="0" maxOccurs="2147483647"/>
+				<xs:element ref="substances" minOccurs="0" maxOccurs="2147483647"/>
+				<xs:element ref="cellpopulations" minOccurs="0" maxOccurs="2147483647"/>
+				<xs:element ref="bioinkgroup" minOccurs="0" maxOccurs="2147483647"/>
+				<xs:element ref="process" minOccurs="0" maxOccurs="2147483647"/>
+				<xs:element ref="protocol" minOccurs="0" maxOccurs="2147483647"/>
+				<xs:element ref="results" minOccurs="0" maxOccurs="2147483647"/>
+				<xs:element ref="fieldbinding" minOccurs="0" maxOccurs="2147483647"/>
+				<xs:element ref="calibration" minOccurs="0" maxOccurs="2147483647"/>
+				<xs:element ref="regulatory" minOccurs="0" maxOccurs="2147483647"/>
+				<xs:element ref="openitems" minOccurs="0" maxOccurs="2147483647"/>
+				<xs:element ref="printheads" minOccurs="0" maxOccurs="2147483647"/>
+				<xs:element ref="maturation" minOccurs="0" maxOccurs="2147483647"/>
+				<xs:element ref="characterization" minOccurs="0" maxOccurs="2147483647"/>
+				<xs:any namespace="##other" processContents="lax" minOccurs="0"
+					maxOccurs="2147483647"/>
+			</xs:choice>
+		</xs:sequence>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- 1. Evidence -->
+
+	<xs:complexType name="CT_Evidence">
+		<xs:sequence>
+			<xs:element ref="reference" minOccurs="1" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="ST_ResourceID" use="required"/>
+		<xs:attribute name="path" type="ST_UriReference"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Reference">
+		<xs:attribute name="key" type="xs:token" use="required"/>
+		<xs:attribute name="kind" type="ST_ReferenceKind" use="required"/>
+		<xs:attribute name="doi" type="ST_DOI"/>
+		<xs:attribute name="stdno" type="xs:token"/>
+		<xs:attribute name="url" type="xs:anyURI"/>
+		<xs:attribute name="grade" type="ST_EvidenceGrade"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- 2. Parameters -->
+
+	<xs:complexType name="CT_Param">
+		<xs:attribute name="name" type="xs:token" use="required"/>
+		<xs:attribute name="unit" type="xs:token"/>
+		<xs:attribute name="setpoint" type="xs:string"/>
+		<xs:attribute name="measured" type="xs:string"/>
+		<xs:attribute name="tolerance" type="xs:string"/>
+		<xs:attribute name="provenance" type="ST_Provenance" use="required"/>
+		<xs:attribute name="evid" type="ST_ResourceIDN"/>
+		<xs:attribute name="evindices" type="ST_ResourceIndices"/>
+		<xs:attribute name="method" type="xs:string"/>
+		<xs:attribute name="n" type="ST_ResourceIndexN"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- 3. Substances -->
+
+	<xs:complexType name="CT_Substances">
+		<xs:sequence>
+			<xs:element ref="substance" minOccurs="1" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="ST_ResourceID" use="required"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Substance">
+		<xs:sequence>
+			<xs:element ref="identity"/>
+			<xs:element ref="synthesis" minOccurs="0"/>
+			<xs:element ref="grade" minOccurs="0"/>
+			<xs:element ref="hazard" minOccurs="0" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="role" type="ST_SubstanceRole" use="required"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Identity">
+		<xs:attribute name="kind" type="ST_SubstanceKind" default="pure"/>
+		<xs:attribute name="casrn" type="ST_CASRN"/>
+		<xs:attribute name="iupac" type="xs:string"/>
+		<xs:attribute name="formula" type="xs:token"/>
+		<xs:attribute name="inchikey" type="ST_InChIKey"/>
+		<xs:attribute name="smiles" type="xs:string"/>
+		<xs:attribute name="chebi" type="xs:token"/>
+		<xs:attribute name="pubchemcid" type="xs:token"/>
+		<xs:attribute name="unii" type="xs:token"/>
+		<xs:attribute name="mw" type="ST_NumberN"/>
+		<xs:attribute name="mwunit" type="xs:token"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Synthesis">
+		<xs:sequence>
+			<xs:element ref="step" minOccurs="1" maxOccurs="2147483647"/>
+			<xs:element ref="yield"/>
+			<xs:element ref="verification" minOccurs="1" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="route" type="xs:string" use="required"/>
+		<xs:attribute name="evid" type="ST_ResourceIDN"/>
+		<xs:attribute name="evindices" type="ST_ResourceIndices"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Step">
+		<xs:sequence>
+			<xs:element ref="param" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="index" type="ST_ResourceIndex" use="required"/>
+		<xs:attribute name="op" type="xs:token" use="required"/>
+		<xs:attribute name="reagent" type="xs:string"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Yield">
+		<xs:attribute name="kind" type="ST_YieldKind" use="required"/>
+		<xs:attribute name="unit" type="xs:token"/>
+		<xs:attribute name="measured" type="xs:string"/>
+		<xs:attribute name="provenance" type="ST_Provenance" use="required"/>
+		<xs:attribute name="evid" type="ST_ResourceIDN"/>
+		<xs:attribute name="evindices" type="ST_ResourceIndices"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Verification">
+		<xs:attribute name="assay" type="xs:token" use="required"/>
+		<xs:attribute name="endpoint" type="xs:token" use="required"/>
+		<xs:attribute name="unit" type="xs:token"/>
+		<xs:attribute name="measured" type="xs:string"/>
+		<xs:attribute name="provenance" type="ST_Provenance" use="required"/>
+		<xs:attribute name="evid" type="ST_ResourceIDN"/>
+		<xs:attribute name="evindices" type="ST_ResourceIndices"/>
+		<xs:attribute name="method" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Grade">
+		<xs:attribute name="purity" type="ST_NumberN"/>
+		<xs:attribute name="endotoxin" type="ST_NumberN"/>
+		<xs:attribute name="endotoxinunit" type="xs:token"/>
+		<xs:attribute name="sterility" type="xs:token"/>
+		<xs:attribute name="supplier" type="xs:string"/>
+		<xs:attribute name="lot" type="xs:string"/>
+		<xs:attribute name="coa" type="ST_UriReferenceN"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Hazard">
+		<xs:attribute name="ghs" type="xs:token"/>
+		<xs:attribute name="hstatement" type="xs:token"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- 4. Cell populations -->
+
+	<xs:complexType name="CT_CellPopulations">
+		<xs:sequence>
+			<xs:element ref="cellpopulation" minOccurs="1" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="ST_ResourceID" use="required"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_CellPopulation">
+		<xs:sequence>
+			<xs:element ref="origin"/>
+			<xs:element ref="authentication" minOccurs="1" maxOccurs="2147483647"/>
+			<xs:element ref="culture"/>
+			<xs:element ref="differentiation" minOccurs="0"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Origin">
+		<xs:attribute name="kind" type="ST_CellKind" use="required"/>
+		<xs:attribute name="rrid" type="ST_RRID"/>
+		<xs:attribute name="celltype" type="xs:token"/>
+		<xs:attribute name="uberon" type="xs:token"/>
+		<xs:attribute name="taxon" type="xs:token"/>
+		<xs:attribute name="donorage" type="xs:string"/>
+		<xs:attribute name="donorsex" type="xs:string"/>
+		<xs:attribute name="ethicsref" type="xs:string"/>
+		<xs:attribute name="bank" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Authentication">
+		<xs:attribute name="assay" type="xs:token" use="required"/>
+		<xs:attribute name="method" type="xs:string"/>
+		<xs:attribute name="date" type="ST_DateN"/>
+		<xs:attribute name="result" type="xs:string" use="required"/>
+		<xs:attribute name="report" type="ST_UriReferenceN"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Culture">
+		<xs:sequence>
+			<xs:element ref="supplement" minOccurs="0" maxOccurs="2147483647"/>
+			<xs:element ref="param" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="medium" type="xs:string" use="required"/>
+		<xs:attribute name="basal" type="xs:string"/>
+		<xs:attribute name="serum" type="ST_NumberN"/>
+		<xs:attribute name="serumlot" type="xs:string"/>
+		<xs:attribute name="antibiotics" type="xs:string" use="required"/>
+		<xs:attribute name="substrate" type="xs:string"/>
+		<xs:attribute name="dissociation" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Supplement">
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="casrn" type="ST_CASRN"/>
+		<xs:attribute name="value" type="xs:string"/>
+		<xs:attribute name="unit" type="xs:token"/>
+		<xs:attribute name="supplier" type="xs:string"/>
+		<xs:attribute name="lot" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Differentiation">
+		<xs:sequence>
+			<xs:element ref="param" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="protocolid" type="ST_ResourceIDN"/>
+		<xs:attribute name="markers" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- 5. Bioink property group -->
+
+	<xs:complexType name="CT_BioInkGroup">
+		<xs:sequence>
+			<xs:element ref="bioink" minOccurs="1" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="ST_ResourceID" use="required"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_BioInk">
+		<xs:sequence>
+			<xs:element ref="component" minOccurs="1" maxOccurs="2147483647"/>
+			<xs:element ref="cellload" minOccurs="0" maxOccurs="2147483647"/>
+			<xs:element ref="crosslink" minOccurs="0" maxOccurs="2147483647"/>
+			<xs:element ref="rheology" minOccurs="0"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="class" type="ST_InkClass" use="required"/>
+		<xs:attribute name="displaycolor" type="ST_ColorValue"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Component">
+		<xs:attribute name="substanceid" type="ST_ResourceID" use="required"/>
+		<xs:attribute name="substanceindex" type="ST_ResourceIndex" use="required"/>
+		<xs:attribute name="value" type="xs:string" use="required"/>
+		<xs:attribute name="unit" type="xs:token" use="required"/>
+		<xs:attribute name="provenance" type="ST_Provenance" use="required"/>
+		<xs:attribute name="evid" type="ST_ResourceIDN"/>
+		<xs:attribute name="evindices" type="ST_ResourceIndices"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_CellLoad">
+		<xs:attribute name="cellpopid" type="ST_ResourceID" use="required"/>
+		<xs:attribute name="cellpopindex" type="ST_ResourceIndex" use="required"/>
+		<!-- Exactly one of (density + unit) or fieldid MUST be present; see rule F3.
+		     A uniform load is a scalar; a graded load is a volumetric field. -->
+		<xs:attribute name="density" type="xs:string"/>
+		<xs:attribute name="unit" type="xs:token"/>
+		<xs:attribute name="fieldid" type="ST_ResourceIDN"/>
+		<xs:attribute name="provenance" type="ST_Provenance" use="required"/>
+		<xs:attribute name="method" type="xs:string"/>
+		<xs:attribute name="n" type="ST_ResourceIndexN"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Crosslink">
+		<xs:sequence>
+			<xs:element ref="param" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="mechanism" type="ST_CrosslinkMechanism" use="required"/>
+		<xs:attribute name="agentid" type="ST_ResourceIDN"/>
+		<xs:attribute name="agentindex" type="ST_ResourceIndexN"/>
+		<xs:attribute name="wavelength" type="ST_NumberN"/>
+		<xs:attribute name="stage" type="ST_CrosslinkStage"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Rheology">
+		<xs:sequence>
+			<xs:element ref="param" minOccurs="1" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="model" type="ST_RheologyModel" use="required"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- 6. Process -->
+
+	<xs:complexType name="CT_Process">
+		<xs:sequence>
+			<xs:element ref="machine"/>
+			<xs:element ref="parameters"/>
+			<xs:element ref="environment" minOccurs="0"/>
+			<xs:element ref="toolpath" minOccurs="0"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="ST_ResourceID" use="required"/>
+		<xs:attribute name="modality" type="ST_Modality" use="required"/>
+		<!-- Crosswalk to the seven ISO/ASTM 52900:2021 process categories. Bio modalities are
+		     finer-grained than 52900, so this is many-to-one and informative, not normative. -->
+		<xs:attribute name="iso52900" type="ST_ISO52900Category"/>
+		<xs:attribute name="printheadsid" type="ST_ResourceIDN"/>
+		<xs:attribute name="calibrationid" type="ST_ResourceIDN"/>
+		<xs:attribute name="regulatoryid" type="ST_ResourceIDN"/>
+		<xs:attribute name="evid" type="ST_ResourceIDN"/>
+		<xs:attribute name="evindices" type="ST_ResourceIndices"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Machine">
+		<xs:attribute name="vendor" type="xs:string"/>
+		<xs:attribute name="model" type="xs:string"/>
+		<xs:attribute name="firmware" type="xs:string"/>
+		<xs:attribute name="serial" type="xs:string"/>
+		<xs:attribute name="calibrationdate" type="ST_DateN"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_ParamList">
+		<xs:sequence>
+			<xs:element ref="param" minOccurs="1" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Toolpath">
+		<xs:sequence>
+			<xs:element ref="commandmap" minOccurs="0"/>
+			<xs:element ref="layerevent" minOccurs="0" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="path" type="ST_UriReference" use="required"/>
+		<xs:attribute name="dialect" type="xs:token" use="required"/>
+		<xs:attribute name="checksum" type="xs:token" use="required"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_CommandMap">
+		<xs:sequence>
+			<xs:element ref="cmd" minOccurs="1" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Cmd">
+		<xs:attribute name="code" type="xs:string" use="required"/>
+		<xs:attribute name="means" type="xs:token" use="required"/>
+		<xs:attribute name="unit" type="xs:token"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_LayerEvent">
+		<xs:sequence>
+			<xs:element ref="param" minOccurs="1" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="layer" type="ST_ResourceIndex" use="required"/>
+		<xs:attribute name="op" type="xs:token" use="required"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- 7. Protocols and results -->
+
+	<xs:complexType name="CT_Protocol">
+		<xs:attribute name="id" type="ST_ResourceID" use="required"/>
+		<xs:attribute name="stage" type="ST_ProtocolStage" use="required"/>
+		<xs:attribute name="title" type="xs:string" use="required"/>
+		<xs:attribute name="doi" type="ST_DOI"/>
+		<xs:attribute name="path" type="ST_UriReferenceN"/>
+		<xs:attribute name="evid" type="ST_ResourceIDN"/>
+		<xs:attribute name="evindices" type="ST_ResourceIndices"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Results">
+		<xs:sequence>
+			<xs:element ref="result" minOccurs="1" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="ST_ResourceID" use="required"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Result">
+		<xs:sequence>
+			<xs:element ref="param" minOccurs="1" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="endpoint" type="xs:token" use="required"/>
+		<xs:attribute name="acceptance" type="xs:string"/>
+		<xs:attribute name="timepoint" type="xs:string"/>
+		<xs:attribute name="path" type="ST_UriReferenceN"/>
+		<xs:attribute name="targetid" type="ST_ResourceIDN"/>
+		<xs:attribute name="targetindex" type="ST_ResourceIndexN"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- 8. Field bindings (3MF Volumetric Extension interop) -->
+
+	<xs:complexType name="CT_FieldBinding">
+		<xs:sequence>
+			<xs:element ref="maps" minOccurs="0"/>
+			<xs:element ref="range" minOccurs="0"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="ST_ResourceID" use="required"/>
+		<xs:attribute name="volumeid" type="ST_ResourceID" use="required"/>
+		<xs:attribute name="property" type="xs:token" use="required"/>
+		<xs:attribute name="quantity" type="ST_BioQuantity" use="required"/>
+		<xs:attribute name="unit" type="xs:token" use="required"/>
+		<xs:attribute name="provenance" type="ST_Provenance" use="required"/>
+		<xs:attribute name="evid" type="ST_ResourceIDN"/>
+		<xs:attribute name="evindices" type="ST_ResourceIndices"/>
+		<xs:attribute name="method" type="xs:string"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_FieldMaps">
+		<xs:attribute name="bioinkid" type="ST_ResourceID" use="required"/>
+		<xs:attribute name="bioinkindex" type="ST_ResourceIndex" use="required"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_FieldRange">
+		<xs:attribute name="min" type="ST_NumberN"/>
+		<xs:attribute name="max" type="ST_NumberN"/>
+		<xs:attribute name="fallback" type="ST_NumberN"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- 8a. Printheads (deposition-based modalities) -->
+
+	<xs:complexType name="CT_PrintHeads">
+		<xs:sequence>
+			<xs:element ref="printhead" minOccurs="1" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="ST_ResourceID" use="required"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_PrintHead">
+		<xs:sequence>
+			<xs:element ref="nozzle"/>
+			<xs:element ref="coaxial" minOccurs="0"/>
+			<xs:element ref="param" minOccurs="0" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="drive" type="ST_Drive" use="required"/>
+		<xs:attribute name="tool" type="xs:token"/>
+		<!-- The formulation this head is loaded with. An object printed by this head that
+		     selects a different bioink via pid/pindex is a contradiction (rule H3). -->
+		<xs:attribute name="bioinkid" type="ST_ResourceIDN"/>
+		<xs:attribute name="bioinkindex" type="ST_ResourceIndexN"/>
+		<xs:attribute name="temperaturecontrolled" type="xs:boolean"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Nozzle">
+		<xs:attribute name="geometry" type="ST_NozzleGeometry" use="required"/>
+		<xs:attribute name="innerdiameter" type="ST_NumberN" use="required"/>
+		<xs:attribute name="length" type="ST_NumberN"/>
+		<xs:attribute name="unit" type="xs:token" use="required"/>
+		<xs:attribute name="gauge" type="xs:token"/>
+		<xs:attribute name="material" type="xs:string"/>
+		<xs:attribute name="taperangle" type="ST_NumberN"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Coaxial">
+		<xs:sequence>
+			<xs:element ref="channel" minOccurs="2" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="outerdiameter" type="ST_NumberN"/>
+		<xs:attribute name="unit" type="xs:token"/>
+		<xs:attribute name="product" type="ST_CoaxialProduct" use="required"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Channel">
+		<xs:sequence>
+			<xs:element ref="param" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="role" type="ST_ChannelRole" use="required"/>
+		<xs:attribute name="content" type="ST_ChannelContent" use="required"/>
+		<xs:attribute name="innerdiameter" type="ST_NumberN"/>
+		<xs:attribute name="unit" type="xs:token"/>
+		<xs:attribute name="bioinkid" type="ST_ResourceIDN"/>
+		<xs:attribute name="bioinkindex" type="ST_ResourceIndexN"/>
+		<xs:attribute name="substanceid" type="ST_ResourceIDN"/>
+		<xs:attribute name="substanceindex" type="ST_ResourceIndexN"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- 8b. Maturation: what happens to the construct AFTER it is printed -->
+
+	<xs:complexType name="CT_Maturation">
+		<xs:sequence>
+			<xs:element ref="stage" minOccurs="1" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="ST_ResourceID" use="required"/>
+		<xs:attribute name="targetid" type="ST_ResourceIDN"/>
+		<xs:attribute name="totalduration" type="xs:string"/>
+		<xs:attribute name="protocolid" type="ST_ResourceIDN"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- A maturation stage is a window of time with one culture regime. Differentiation,
+	     conditioning and functional maturation are usually staged, and the transitions are
+	     as much a part of the record as the conditions. -->
+	<xs:complexType name="CT_MaturationStage">
+		<xs:sequence>
+			<xs:element ref="bioreactor" minOccurs="0"/>
+			<xs:element ref="stimulation" minOccurs="0" maxOccurs="2147483647"/>
+			<xs:element ref="medium" minOccurs="0" maxOccurs="2147483647"/>
+			<xs:element ref="param" minOccurs="0" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="index" type="ST_ResourceIndex" use="required"/>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="culture" type="ST_CultureFormat" use="required"/>
+		<xs:attribute name="from" type="ST_Timepoint" use="required"/>
+		<xs:attribute name="to" type="ST_Timepoint" use="required"/>
+		<xs:attribute name="purpose" type="xs:string"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Bioreactor">
+		<xs:sequence>
+			<xs:element ref="param" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="kind" type="ST_BioreactorKind" use="required"/>
+		<xs:attribute name="vendor" type="xs:string"/>
+		<xs:attribute name="model" type="xs:string"/>
+		<xs:attribute name="vesselvolume" type="ST_NumberN"/>
+		<xs:attribute name="unit" type="xs:token"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Stimulation">
+		<xs:sequence>
+			<xs:element ref="param" minOccurs="1" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="mode" type="ST_StimulationMode" use="required"/>
+		<xs:attribute name="onset" type="ST_Timepoint"/>
+		<xs:attribute name="dutycycle" type="xs:string"/>
+		<xs:attribute name="evid" type="ST_ResourceIDN"/>
+		<xs:attribute name="evindices" type="ST_ResourceIndices"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Medium">
+		<xs:sequence>
+			<xs:element ref="supplement" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="basal" type="xs:string"/>
+		<xs:attribute name="serum" type="ST_NumberN"/>
+		<xs:attribute name="serumlot" type="xs:string"/>
+		<xs:attribute name="exchangeinterval" type="xs:string"/>
+		<xs:attribute name="exchangevolume" type="xs:string"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- 8c. Characterization of the printed and matured construct -->
+
+	<xs:complexType name="CT_Characterization">
+		<xs:sequence>
+			<xs:element ref="assay" minOccurs="1" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="ST_ResourceID" use="required"/>
+		<xs:attribute name="targetid" type="ST_ResourceIDN"/>
+		<xs:attribute name="targetindex" type="ST_ResourceIndexN"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Assay">
+		<xs:sequence>
+			<xs:element ref="reading" minOccurs="0" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:token" use="required"/>
+		<xs:attribute name="domain" type="ST_AssayDomain" use="required"/>
+		<xs:attribute name="endpoint" type="xs:token" use="required"/>
+		<xs:attribute name="unit" type="xs:token"/>
+		<xs:attribute name="method" type="xs:string" use="required"/>
+		<xs:attribute name="destructive" type="xs:boolean"/>
+		<xs:attribute name="acceptance" type="xs:string"/>
+		<xs:attribute name="protocolid" type="ST_ResourceIDN"/>
+		<xs:attribute name="evid" type="ST_ResourceIDN"/>
+		<xs:attribute name="evindices" type="ST_ResourceIndices"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- A reading is one assay at one timepoint. Several readings form the timecourse that
+	     a single-valued result element cannot express. -->
+	<xs:complexType name="CT_Reading">
+		<xs:attribute name="timepoint" type="ST_Timepoint" use="required"/>
+		<xs:attribute name="value" type="xs:string"/>
+		<xs:attribute name="sd" type="ST_NumberN"/>
+		<xs:attribute name="n" type="ST_ResourceIndexN"/>
+		<xs:attribute name="provenance" type="ST_Provenance" use="required"/>
+		<xs:attribute name="path" type="ST_UriReferenceN"/>
+		<xs:attribute name="outcome" type="ST_ReadingOutcome"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- 9. Calibration -->
+
+	<xs:complexType name="CT_Calibration">
+		<xs:sequence>
+			<xs:element ref="test" minOccurs="1" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="ST_ResourceID" use="required"/>
+		<xs:attribute name="modality" type="ST_Modality" use="required"/>
+		<xs:attribute name="performed" type="ST_DateN"/>
+		<xs:attribute name="operator" type="xs:string"/>
+		<xs:attribute name="standard" type="xs:token"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_CalibrationTest">
+		<xs:sequence>
+			<xs:element ref="param" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:token" use="required"/>
+		<xs:attribute name="kind" type="ST_CalibrationKind" use="required"/>
+		<xs:attribute name="metric" type="xs:token" use="required"/>
+		<xs:attribute name="unit" type="xs:token"/>
+		<xs:attribute name="acceptance" type="xs:string" use="required"/>
+		<xs:attribute name="measured" type="xs:string"/>
+		<xs:attribute name="outcome" type="ST_CalibrationOutcome" use="required"/>
+		<xs:attribute name="frequency" type="xs:token"/>
+		<xs:attribute name="artifactobjectid" type="ST_ResourceIDN"/>
+		<xs:attribute name="stdref" type="xs:token"/>
+		<xs:attribute name="evid" type="ST_ResourceIDN"/>
+		<xs:attribute name="evindices" type="ST_ResourceIndices"/>
+		<xs:attribute name="method" type="xs:string"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- 10. Regulatory context -->
+
+	<xs:complexType name="CT_Regulatory">
+		<xs:sequence>
+			<xs:element ref="jurisdiction" minOccurs="1" maxOccurs="2147483647"/>
+			<xs:element ref="standardref" minOccurs="0" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="ST_ResourceID" use="required"/>
+		<xs:attribute name="intendeduse" type="ST_IntendedUse" use="required"/>
+		<xs:attribute name="contactduration" type="ST_ContactDuration"/>
+		<xs:attribute name="contactnature" type="ST_ContactNature"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Jurisdiction">
+		<xs:sequence>
+			<xs:element ref="obligation" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="region" type="xs:token" use="required"/>
+		<xs:attribute name="framework" type="xs:token" use="required"/>
+		<xs:attribute name="instrument" type="xs:string" use="required"/>
+		<xs:attribute name="classification" type="xs:string"/>
+		<xs:attribute name="authority" type="xs:token"/>
+		<xs:attribute name="determination" type="ST_Determination" use="required"/>
+		<xs:attribute name="determinedby" type="xs:string"/>
+		<xs:attribute name="determineddate" type="ST_DateN"/>
+		<xs:attribute name="evid" type="ST_ResourceIDN"/>
+		<xs:attribute name="evindices" type="ST_ResourceIndices"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Obligation">
+		<xs:attribute name="ref" type="xs:string" use="required"/>
+		<xs:attribute name="title" type="xs:string"/>
+		<xs:attribute name="status" type="ST_ObligationStatus" use="required"/>
+		<xs:attribute name="evidencepath" type="ST_UriReferenceN"/>
+		<xs:attribute name="openitemid" type="ST_ResourceIDN"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_StandardRef">
+		<xs:attribute name="stdno" type="xs:token" use="required"/>
+		<xs:attribute name="title" type="xs:string"/>
+		<xs:attribute name="applies" type="xs:token"/>
+		<xs:attribute name="status" type="ST_ObligationStatus"/>
+		<xs:attribute name="note" type="xs:string"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- 11. Open items: unknowns as data, not as comments -->
+
+	<xs:complexType name="CT_OpenItems">
+		<xs:sequence>
+			<xs:element ref="openitem" minOccurs="1" maxOccurs="2147483647"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="ST_ResourceID" use="required"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_OpenItem">
+		<xs:sequence>
+			<xs:element ref="affects" minOccurs="0" maxOccurs="2147483647"/>
+		</xs:sequence>
+		<xs:attribute name="key" type="xs:token" use="required"/>
+		<xs:attribute name="kind" type="ST_OpenItemKind" use="required"/>
+		<xs:attribute name="severity" type="ST_Severity" use="required"/>
+		<xs:attribute name="status" type="ST_OpenItemStatus" use="required"/>
+		<xs:attribute name="summary" type="xs:string" use="required"/>
+		<xs:attribute name="action" type="xs:string" use="required"/>
+		<xs:attribute name="owner" type="xs:string"/>
+		<xs:attribute name="raised" type="ST_DateN"/>
+		<xs:attribute name="due" type="ST_DateN"/>
+		<xs:attribute name="resolved" type="ST_DateN"/>
+		<xs:attribute name="resolution" type="xs:string"/>
+		<xs:attribute name="evid" type="ST_ResourceIDN"/>
+		<xs:attribute name="evindices" type="ST_ResourceIndices"/>
+		<!-- Human-readable strings (summary, action, resolution) are authored in the language
+		     declared by the core <model xml:lang> attribute. Translations live in a package
+		     part, not in this element; see specification Chapter 10. Repeating a string in an
+		     attribute cannot express more than one language anyway. -->
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Affects">
+		<xs:attribute name="targetid" type="ST_ResourceID" use="required"/>
+		<xs:attribute name="targetindex" type="ST_ResourceIndexN"/>
+		<xs:attribute name="paramname" type="xs:token"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- 12. Core element extensions -->
+
+	<xs:complexType name="CT_Object">
+		<xs:attribute name="processid" type="ST_ResourceID"/>
+		<xs:attribute name="regionrole" type="ST_RegionRole"/>
+		<xs:attribute name="printheadid" type="ST_ResourceIDN"/>
+		<xs:attribute name="printheadindex" type="ST_ResourceIndexN"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<xs:complexType name="CT_Item">
+		<xs:attribute name="processid" type="ST_ResourceID"/>
+		<xs:anyAttribute namespace="##other" processContents="lax"/>
+	</xs:complexType>
+
+	<!-- Simple Types -->
+
+	<xs:simpleType name="ST_Empty">
+		<xs:restriction base="xs:string">
+			<xs:length value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_ResourceID">
+		<xs:restriction base="xs:positiveInteger">
+			<xs:maxExclusive value="2147483648"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_ResourceIndex">
+		<xs:restriction base="xs:nonNegativeInteger">
+			<xs:maxExclusive value="2147483648"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_ResourceIndices">
+		<xs:list itemType="ST_ResourceIndex"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_ResourceIDN">
+		<xs:union memberTypes="ST_ResourceID ST_Empty"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_ResourceIndexN">
+		<xs:union memberTypes="ST_ResourceIndex ST_Empty"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_Number">
+		<xs:restriction base="xs:double">
+			<xs:whiteSpace value="collapse"/>
+			<xs:pattern value="((\-|\+)?(([0-9]+(\.[0-9]+)?)|(\.[0-9]+))((e|E)(\-|\+)?[0-9]+)?)"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_NumberN">
+		<xs:union memberTypes="ST_Number ST_Empty"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_ColorValue">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="#[0-9|A-F|a-f][0-9|A-F|a-f][0-9|A-F|a-f][0-9|A-F|a-f][0-9|A-F|a-f][0-9|A-F|a-f]([0-9|A-F|a-f][0-9|A-F|a-f])?"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_UriReference">
+		<xs:restriction base="xs:anyURI">
+			<xs:pattern value="/.*"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_UriReferenceN">
+		<xs:union memberTypes="ST_UriReference ST_Empty"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_DateN">
+		<xs:union memberTypes="xs:date ST_Empty"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_Provenance">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="measured"/>
+			<xs:enumeration value="derived"/>
+			<xs:enumeration value="cited"/>
+			<xs:enumeration value="vendor"/>
+			<xs:enumeration value="estimated"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_ReferenceKind">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="peer-reviewed"/>
+			<xs:enumeration value="preprint"/>
+			<xs:enumeration value="standard"/>
+			<xs:enumeration value="book"/>
+			<xs:enumeration value="protocol"/>
+			<xs:enumeration value="vendor-doc"/>
+			<xs:enumeration value="internal-report"/>
+			<xs:enumeration value="dataset"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_EvidenceGrade">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[A-F]"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_SubstanceKind">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="pure"/>
+			<xs:enumeration value="mixture"/>
+			<xs:enumeration value="biological"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_SubstanceRole">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="polymer"/>
+			<xs:enumeration value="monomer"/>
+			<xs:enumeration value="photoinitiator"/>
+			<xs:enumeration value="photoabsorber"/>
+			<xs:enumeration value="crosslinker"/>
+			<xs:enumeration value="buffer"/>
+			<xs:enumeration value="sacrificial"/>
+			<xs:enumeration value="support-bath"/>
+			<xs:enumeration value="additive"/>
+			<xs:enumeration value="growth-factor"/>
+			<xs:enumeration value="mineral-precursor"/>
+			<xs:enumeration value="solvent"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_YieldKind">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="isolated"/>
+			<xs:enumeration value="mass"/>
+			<xs:enumeration value="molar"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_InkClass">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="bioink"/>
+			<xs:enumeration value="biomaterial-ink"/>
+			<xs:enumeration value="bioresin"/>
+			<xs:enumeration value="support-bath"/>
+			<xs:enumeration value="fugitive"/>
+			<xs:enumeration value="sacrificial"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_CrosslinkMechanism">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="photo-chain-growth"/>
+			<xs:enumeration value="photo-step-growth"/>
+			<xs:enumeration value="ionic"/>
+			<xs:enumeration value="enzymatic"/>
+			<xs:enumeration value="thermal"/>
+			<xs:enumeration value="ph-driven"/>
+			<xs:enumeration value="physical"/>
+			<xs:enumeration value="none"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_CrosslinkStage">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="pre"/>
+			<xs:enumeration value="in-process"/>
+			<xs:enumeration value="post"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_RheologyModel">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="newtonian"/>
+			<xs:enumeration value="power-law"/>
+			<xs:enumeration value="Herschel-Bulkley"/>
+			<xs:enumeration value="Bingham"/>
+			<xs:enumeration value="Carreau-Yasuda"/>
+			<xs:enumeration value="Cross"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_CellKind">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="line"/>
+			<xs:enumeration value="primary"/>
+			<xs:enumeration value="iPSC-derived"/>
+			<xs:enumeration value="ESC-derived"/>
+			<xs:enumeration value="organoid"/>
+			<xs:enumeration value="spheroid"/>
+			<xs:enumeration value="co-culture"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_RegionRole">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="parenchyma"/>
+			<xs:enumeration value="vasculature"/>
+			<xs:enumeration value="interface"/>
+			<xs:enumeration value="sacrificial"/>
+			<xs:enumeration value="support"/>
+			<xs:enumeration value="fiducial"/>
+			<xs:enumeration value="test-coupon"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_ProtocolStage">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="pre-print"/>
+			<xs:enumeration value="print"/>
+			<xs:enumeration value="post-print"/>
+			<xs:enumeration value="culture"/>
+			<xs:enumeration value="assay"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_Modality">
+		<xs:union>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="extrusion-pneumatic"/>
+					<xs:enumeration value="extrusion-piston"/>
+					<xs:enumeration value="extrusion-screw"/>
+					<xs:enumeration value="extrusion-embedded"/>
+					<xs:enumeration value="extrusion-coaxial"/>
+					<xs:enumeration value="inkjet-piezo"/>
+					<xs:enumeration value="inkjet-thermal"/>
+					<xs:enumeration value="microvalve"/>
+					<xs:enumeration value="acoustic-droplet"/>
+					<xs:enumeration value="laser-lift"/>
+					<xs:enumeration value="vat-sla"/>
+					<xs:enumeration value="vat-dlp"/>
+					<xs:enumeration value="vat-2pp"/>
+					<xs:enumeration value="volumetric-tomographic"/>
+					<xs:enumeration value="melt-electrowriting"/>
+					<xs:enumeration value="electrospinning"/>
+					<xs:enumeration value="stereolithography-continuous"/>
+					<xs:enumeration value="magnetic-levitation"/>
+					<xs:enumeration value="bioassembly-spheroid"/>
+					<xs:enumeration value="in-situ"/>
+				</xs:restriction>
+			</xs:simpleType>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:pattern value="x-[A-Za-z0-9\-]+"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:union>
+	</xs:simpleType>
+
+	<!-- ISO 8601 duration offset from the end of printing: P0D is immediately post-print,
+	     P7D is day 7, PT4H is four hours. Using a duration rather than a label keeps
+	     timepoints orderable and comparable across packages. -->
+	<xs:simpleType name="ST_Timepoint">
+		<xs:union>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:pattern value="P([0-9]+Y)?([0-9]+M)?([0-9]+W)?([0-9]+D)?(T([0-9]+H)?([0-9]+M)?([0-9]+(\.[0-9]+)?S)?)?"/>
+				</xs:restriction>
+			</xs:simpleType>
+			<xs:simpleType><xs:restriction base="xs:string"><xs:length value="0"/></xs:restriction></xs:simpleType>
+		</xs:union>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_CultureFormat">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="static"/>
+			<xs:enumeration value="orbital"/>
+			<xs:enumeration value="spinner"/>
+			<xs:enumeration value="rotating-wall"/>
+			<xs:enumeration value="perfusion"/>
+			<xs:enumeration value="air-liquid-interface"/>
+			<xs:enumeration value="microfluidic"/>
+			<xs:enumeration value="in-vivo"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_BioreactorKind">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="perfusion"/>
+			<xs:enumeration value="spinner-flask"/>
+			<xs:enumeration value="rotating-wall"/>
+			<xs:enumeration value="hydrostatic-pressure"/>
+			<xs:enumeration value="uniaxial-tension"/>
+			<xs:enumeration value="compression"/>
+			<xs:enumeration value="multi-modal"/>
+			<xs:enumeration value="organ-on-chip"/>
+			<xs:enumeration value="none"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_StimulationMode">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="fluid-shear"/>
+			<xs:enumeration value="cyclic-tension"/>
+			<xs:enumeration value="cyclic-compression"/>
+			<xs:enumeration value="hydrostatic-pressure"/>
+			<xs:enumeration value="electrical"/>
+			<xs:enumeration value="electromagnetic"/>
+			<xs:enumeration value="ultrasound"/>
+			<xs:enumeration value="photostimulation"/>
+			<xs:enumeration value="biochemical"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_AssayDomain">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="structural"/>
+			<xs:enumeration value="mechanical"/>
+			<xs:enumeration value="viability"/>
+			<xs:enumeration value="proliferation"/>
+			<xs:enumeration value="phenotype"/>
+			<xs:enumeration value="matrix-deposition"/>
+			<xs:enumeration value="function"/>
+			<xs:enumeration value="transport"/>
+			<xs:enumeration value="degradation"/>
+			<xs:enumeration value="sterility"/>
+			<xs:enumeration value="metabolic"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_ReadingOutcome">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="meets"/>
+			<xs:enumeration value="does-not-meet"/>
+			<xs:enumeration value="not-assessed"/>
+			<xs:enumeration value="inconclusive"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_Drive">
+		<xs:restriction base="xs:string">
+			<!-- The controlled variable differs by drive: pneumatic commands a pressure,
+			     piston and screw command a displacement or rotation. Requiring a pressure
+			     from a piston system is a category error. -->
+			<xs:enumeration value="pneumatic"/>
+			<xs:enumeration value="piston"/>
+			<xs:enumeration value="screw"/>
+			<xs:enumeration value="thermoplastic-filament"/>
+			<xs:enumeration value="solenoid"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_NozzleGeometry">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="cylindrical"/>
+			<xs:enumeration value="conical"/>
+			<xs:enumeration value="tapered-conical"/>
+			<xs:enumeration value="coaxial"/>
+			<xs:enumeration value="triaxial"/>
+			<xs:enumeration value="microfluidic"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_CoaxialProduct">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="solid-fibre"/>
+			<xs:enumeration value="hollow-tube"/>
+			<xs:enumeration value="core-shell"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_ChannelRole">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="core"/>
+			<xs:enumeration value="shell"/>
+			<xs:enumeration value="sheath"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_ChannelContent">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="bioink"/>
+			<xs:enumeration value="crosslinker"/>
+			<xs:enumeration value="crosslinker-mist"/>
+			<xs:enumeration value="sacrificial"/>
+			<xs:enumeration value="buffer"/>
+			<xs:enumeration value="air"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_ISO52900Category">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="MEX"/>
+			<xs:enumeration value="MJT"/>
+			<xs:enumeration value="VPP"/>
+			<xs:enumeration value="BJT"/>
+			<xs:enumeration value="DED"/>
+			<xs:enumeration value="PBF"/>
+			<xs:enumeration value="SHL"/>
+			<xs:enumeration value="not-classified"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_CalibrationKind">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="geometric"/>
+			<xs:enumeration value="dosimetric"/>
+			<xs:enumeration value="rheological"/>
+			<xs:enumeration value="flow"/>
+			<xs:enumeration value="thermal"/>
+			<xs:enumeration value="optical"/>
+			<xs:enumeration value="printability"/>
+			<xs:enumeration value="biological"/>
+			<xs:enumeration value="sterility"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_CalibrationOutcome">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="pass"/>
+			<xs:enumeration value="fail"/>
+			<xs:enumeration value="not-performed"/>
+			<xs:enumeration value="inconclusive"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_IntendedUse">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="research-only"/>
+			<xs:enumeration value="in-vitro-model"/>
+			<xs:enumeration value="drug-screening"/>
+			<xs:enumeration value="preclinical"/>
+			<xs:enumeration value="clinical-investigation"/>
+			<xs:enumeration value="implantable"/>
+			<xs:enumeration value="veterinary"/>
+			<xs:enumeration value="education"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_ContactDuration">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="none"/>
+			<xs:enumeration value="limited"/>
+			<xs:enumeration value="prolonged"/>
+			<xs:enumeration value="permanent"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_ContactNature">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="none"/>
+			<xs:enumeration value="surface"/>
+			<xs:enumeration value="external-communicating"/>
+			<xs:enumeration value="implant"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_Determination">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="confirmed-by-authority"/>
+			<xs:enumeration value="self-assessed"/>
+			<xs:enumeration value="advice-sought"/>
+			<xs:enumeration value="undetermined"/>
+			<xs:enumeration value="not-applicable"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_ObligationStatus">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="met"/>
+			<xs:enumeration value="partial"/>
+			<xs:enumeration value="not-met"/>
+			<xs:enumeration value="not-applicable"/>
+			<xs:enumeration value="unknown"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_OpenItemKind">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="unmeasured"/>
+			<xs:enumeration value="unverified"/>
+			<xs:enumeration value="unavailable"/>
+			<xs:enumeration value="disputed"/>
+			<xs:enumeration value="out-of-scope"/>
+			<xs:enumeration value="blocked"/>
+			<xs:enumeration value="placeholder"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_Severity">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="blocking"/>
+			<xs:enumeration value="material"/>
+			<xs:enumeration value="minor"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_OpenItemStatus">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="open"/>
+			<xs:enumeration value="in-progress"/>
+			<xs:enumeration value="resolved"/>
+			<xs:enumeration value="wont-fix"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_BioQuantity">
+		<xs:union>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="cell_density"/>
+					<xs:enumeration value="stiffness_target"/>
+					<xs:enumeration value="photoinitiator_conc"/>
+					<xs:enumeration value="polymer_conc"/>
+					<xs:enumeration value="porosity"/>
+					<xs:enumeration value="mineral_fraction"/>
+					<xs:enumeration value="growth_factor_conc"/>
+					<xs:enumeration value="degradation_rate"/>
+					<xs:enumeration value="oxygen_tension"/>
+					<xs:enumeration value="crosslink_density"/>
+				</xs:restriction>
+			</xs:simpleType>
+			<xs:simpleType>
+				<xs:restriction base="xs:string"><xs:pattern value="x-[A-Za-z0-9_\-]+"/></xs:restriction>
+			</xs:simpleType>
+		</xs:union>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_CASRN">
+		<xs:union>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:pattern value="[0-9]{2,7}-[0-9]{2}-[0-9]"/>
+				</xs:restriction>
+			</xs:simpleType>
+			<xs:simpleType>
+				<xs:restriction base="xs:string"><xs:length value="0"/></xs:restriction>
+			</xs:simpleType>
+		</xs:union>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_InChIKey">
+		<xs:union>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:pattern value="[A-Z]{14}-[A-Z]{10}-[A-Z]"/>
+				</xs:restriction>
+			</xs:simpleType>
+			<xs:simpleType>
+				<xs:restriction base="xs:string"><xs:length value="0"/></xs:restriction>
+			</xs:simpleType>
+		</xs:union>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_RRID">
+		<xs:union>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:pattern value="CVCL_[0-9A-Z]{4}"/>
+				</xs:restriction>
+			</xs:simpleType>
+			<xs:simpleType>
+				<xs:restriction base="xs:string"><xs:length value="0"/></xs:restriction>
+			</xs:simpleType>
+		</xs:union>
+	</xs:simpleType>
+
+	<xs:simpleType name="ST_DOI">
+		<xs:union>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:pattern value="10\.[0-9]{4,9}/.+"/>
+				</xs:restriction>
+			</xs:simpleType>
+			<xs:simpleType>
+				<xs:restriction base="xs:string"><xs:length value="0"/></xs:restriction>
+			</xs:simpleType>
+		</xs:union>
+	</xs:simpleType>
+
+	<!-- Attributes -->
+
+	<!-- Elements -->
+	<xs:element name="resources" type="CT_Resources"/>
+	<xs:element name="object" type="CT_Object"/>
+	<xs:element name="item" type="CT_Item"/>
+	<xs:element name="evidence" type="CT_Evidence"/>
+	<xs:element name="reference" type="CT_Reference"/>
+	<xs:element name="param" type="CT_Param"/>
+	<xs:element name="substances" type="CT_Substances"/>
+	<xs:element name="substance" type="CT_Substance"/>
+	<xs:element name="identity" type="CT_Identity"/>
+	<xs:element name="synthesis" type="CT_Synthesis"/>
+	<xs:element name="step" type="CT_Step"/>
+	<xs:element name="yield" type="CT_Yield"/>
+	<xs:element name="verification" type="CT_Verification"/>
+	<xs:element name="grade" type="CT_Grade"/>
+	<xs:element name="hazard" type="CT_Hazard"/>
+	<xs:element name="cellpopulations" type="CT_CellPopulations"/>
+	<xs:element name="cellpopulation" type="CT_CellPopulation"/>
+	<xs:element name="origin" type="CT_Origin"/>
+	<xs:element name="authentication" type="CT_Authentication"/>
+	<xs:element name="culture" type="CT_Culture"/>
+	<xs:element name="supplement" type="CT_Supplement"/>
+	<xs:element name="differentiation" type="CT_Differentiation"/>
+	<xs:element name="bioinkgroup" type="CT_BioInkGroup"/>
+	<xs:element name="bioink" type="CT_BioInk"/>
+	<xs:element name="component" type="CT_Component"/>
+	<xs:element name="cellload" type="CT_CellLoad"/>
+	<xs:element name="crosslink" type="CT_Crosslink"/>
+	<xs:element name="rheology" type="CT_Rheology"/>
+	<xs:element name="process" type="CT_Process"/>
+	<xs:element name="machine" type="CT_Machine"/>
+	<xs:element name="parameters" type="CT_ParamList"/>
+	<xs:element name="environment" type="CT_ParamList"/>
+	<xs:element name="toolpath" type="CT_Toolpath"/>
+	<xs:element name="commandmap" type="CT_CommandMap"/>
+	<xs:element name="cmd" type="CT_Cmd"/>
+	<xs:element name="layerevent" type="CT_LayerEvent"/>
+	<xs:element name="protocol" type="CT_Protocol"/>
+	<xs:element name="results" type="CT_Results"/>
+	<xs:element name="result" type="CT_Result"/>
+	<xs:element name="fieldbinding" type="CT_FieldBinding"/>
+	<xs:element name="maps" type="CT_FieldMaps"/>
+	<xs:element name="range" type="CT_FieldRange"/>
+	<xs:element name="maturation" type="CT_Maturation"/>
+	<xs:element name="stage" type="CT_MaturationStage"/>
+	<xs:element name="bioreactor" type="CT_Bioreactor"/>
+	<xs:element name="stimulation" type="CT_Stimulation"/>
+	<xs:element name="medium" type="CT_Medium"/>
+	<xs:element name="characterization" type="CT_Characterization"/>
+	<xs:element name="assay" type="CT_Assay"/>
+	<xs:element name="reading" type="CT_Reading"/>
+	<xs:element name="printheads" type="CT_PrintHeads"/>
+	<xs:element name="printhead" type="CT_PrintHead"/>
+	<xs:element name="nozzle" type="CT_Nozzle"/>
+	<xs:element name="coaxial" type="CT_Coaxial"/>
+	<xs:element name="channel" type="CT_Channel"/>
+	<xs:element name="calibration" type="CT_Calibration"/>
+	<xs:element name="test" type="CT_CalibrationTest"/>
+	<xs:element name="regulatory" type="CT_Regulatory"/>
+	<xs:element name="jurisdiction" type="CT_Jurisdiction"/>
+	<xs:element name="obligation" type="CT_Obligation"/>
+	<xs:element name="standardref" type="CT_StandardRef"/>
+	<xs:element name="openitems" type="CT_OpenItems"/>
+	<xs:element name="openitem" type="CT_OpenItem"/>
+	<xs:element name="affects" type="CT_Affects"/>
+</xs:schema>

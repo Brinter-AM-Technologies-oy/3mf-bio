@@ -1,0 +1,31 @@
+# Line endings.
+#
+# This matters more here than in most repositories. Rule T4 verifies a toolpath checksum by
+# hashing the referenced file, so if Git rewrites LF to CRLF on checkout the bytes change and
+# the recorded SHA-256 no longer matches. Both exemplars would fail validation on a Windows
+# clone, for a reason that has nothing to do with the package being wrong.
+#
+# Normalise everything to LF in the repository, and check LF out everywhere.
+* text=auto eol=lf
+
+# Files whose bytes are hashed, compared or parsed as binary must never be transformed
+# at all. -text disables end-of-line conversion outright.
+bio/toolpath/**   -text
+*.gcode           -text
+*.bin             binary
+*.3mf             binary
+*.png             binary
+*.pdf             binary
+
+# 3MF package parts are XML but are checksummed as part of an OPC container.
+*.model           text eol=lf
+*.rels            text eol=lf
+
+# Keep diffs readable for the things reviewers actually read.
+*.md              text eol=lf diff=markdown
+*.py              text eol=lf diff=python
+*.xsd             text eol=lf
+*.sch             text eol=lf
+*.json            text eol=lf
+*.yml             text eol=lf
+*.cff             text eol=lf

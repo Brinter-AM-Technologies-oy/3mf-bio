@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Every part referenced by an ST_UriReference in the bio extension MUST be the target of a
+  relationship from the 3D Model part. This mirrors the core rule for textures and is what
+  makes the dossier self-contained rather than a set of dangling paths.
+-->
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rel1" Target="/bio/references.json"
+    Type="https://3mfbio.com/ns/rel/2026/07/biobibliography"/>
+  <Relationship Id="rel2" Target="/bio/protocols/encapsulation.md"
+    Type="https://3mfbio.com/ns/rel/2026/07/bioprotocol"/>
+  <Relationship Id="rel3" Target="/bio/protocols/postcure.md"
+    Type="https://3mfbio.com/ns/rel/2026/07/bioprotocol"/>
+  <Relationship Id="rel4" Target="/bio/protocols/culture.md"
+    Type="https://3mfbio.com/ns/rel/2026/07/bioprotocol"/>
+  <Relationship Id="rel5" Target="/bio/protocols/viability.md"
+    Type="https://3mfbio.com/ns/rel/2026/07/bioprotocol"/>
+  <Relationship Id="rel6" Target="/bio/coa/gelma_lot001.pdf"
+    Type="https://3mfbio.com/ns/rel/2026/07/biocoa"/>
+  <Relationship Id="rel7" Target="/bio/coa/lap_lot002.pdf"
+    Type="https://3mfbio.com/ns/rel/2026/07/biocoa"/>
+  <Relationship Id="rel8" Target="/bio/coa/myco_20260601.pdf"
+    Type="https://3mfbio.com/ns/rel/2026/07/biocoa"/>
+  <Relationship Id="rel9" Target="/bio/results/viability_24h.csv"
+    Type="https://3mfbio.com/ns/rel/2026/07/bioresult"/>
+  <Relationship Id="rel10" Target="/bio/results/mechanics.csv"
+    Type="https://3mfbio.com/ns/rel/2026/07/bioresult"/>
+  <Relationship Id="rel11" Target="/bio/toolpath/projections.bin"
+    Type="https://3mfbio.com/ns/rel/2026/07/biotoolpath"/>
+  <Relationship Id="rel12" Target="/bio/i18n/de.json"
+    Type="https://3mfbio.com/ns/rel/2026/07/biotranslation"/>
+</Relationships>

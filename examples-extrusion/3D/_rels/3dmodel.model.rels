@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rel1" Target="/bio/references.json"
+    Type="https://3mfbio.com/ns/rel/2026/07/biobibliography"/>
+  <Relationship Id="rel2" Target="/bio/coa/myco_hdf.pdf"
+    Type="https://3mfbio.com/ns/rel/2026/07/biocoa"/>
+  <Relationship Id="rel3" Target="/bio/coa/myco_huvec.pdf"
+    Type="https://3mfbio.com/ns/rel/2026/07/biocoa"/>
+  <Relationship Id="rel4" Target="/bio/results/viability_24h.csv"
+    Type="https://3mfbio.com/ns/rel/2026/07/bioresult"/>
+  <Relationship Id="rel5" Target="/bio/toolpath/extrusion.gcode"
+    Type="https://3mfbio.com/ns/rel/2026/07/biotoolpath"/>
+  <Relationship Id="rel6" Target="/bio/protocols/viability.md"
+    Type="https://3mfbio.com/ns/rel/2026/07/bioprotocol"/>
+  <Relationship Id="rel7" Target="/bio/protocols/maturation.md"
+    Type="https://3mfbio.com/ns/rel/2026/07/bioprotocol"/>
+</Relationships>

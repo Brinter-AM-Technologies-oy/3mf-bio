@@ -1,0 +1,70 @@
+[
+  { "id": "astmF3659", "type": "standard",
+    "title": "Standard Guide for Bioinks Used in Bioprinting",
+    "number": "ASTM F3659-24", "publisher": "ASTM International",
+    "issued": { "date-parts": [[2024]] },
+    "note": "Committee F04.42. 20 pp. Cross-references Guide F2150, Guide F2027, ISO 10993 series." },
+
+  { "id": "groll2019", "type": "article-journal",
+    "title": "A definition of bioinks and their distinction from biomaterial inks",
+    "container-title": "Biofabrication", "volume": "11", "issue": "1", "page": "013001",
+    "DOI": "10.1088/1758-5090/aaec52", "issued": { "date-parts": [[2019]] },
+    "author": [
+      { "family": "Groll", "given": "J." }, { "family": "Burdick", "given": "J. A." },
+      { "family": "Cho", "given": "D.-W." }, { "family": "Derby", "given": "B." },
+      { "family": "Gelinsky", "given": "M." }, { "family": "Heilshorn", "given": "S. C." },
+      { "family": "Jungst", "given": "T." }, { "family": "Malda", "given": "J." },
+      { "family": "Mironov", "given": "V. A." }, { "family": "Nakayama", "given": "K." },
+      { "family": "Ovsianikov", "given": "A." }, { "family": "Sun", "given": "W." },
+      { "family": "Takeuchi", "given": "S." }, { "family": "Yoo", "given": "J. J." },
+      { "family": "Woodfield", "given": "T. B. F." } ] },
+
+  { "id": "bernal2019", "type": "article-journal",
+    "title": "Volumetric Bioprinting of Complex Living-Tissue Constructs within Seconds",
+    "container-title": "Advanced Materials", "volume": "31", "page": "1904209",
+    "DOI": "10.1002/adma.201904209", "issued": { "date-parts": [[2019]] },
+    "author": [
+      { "family": "Bernal", "given": "P. N." }, { "family": "Delrot", "given": "P." },
+      { "family": "Loterie", "given": "D." }, { "family": "Li", "given": "Y." },
+      { "family": "Malda", "given": "J." }, { "family": "Moser", "given": "C." },
+      { "family": "Levato", "given": "R." } ] },
+
+  { "id": "bernal2022", "type": "article-journal",
+    "title": "Volumetric Bioprinting of Organoids and Optically Tuned Hydrogels to Build Liver-Like Metabolic Biofactories",
+    "container-title": "Advanced Materials", "DOI": "10.1002/adma.202110054",
+    "issued": { "date-parts": [[2022]] } },
+
+  { "id": "gehlen2022", "type": "article-journal",
+    "title": "Tomographic volumetric bioprinting of heterocellular bone-like tissues in seconds",
+    "container-title": "Acta Biomaterialia",
+    "URL": "https://www.sciencedirect.com/science/article/pii/S1742706122003580",
+    "issued": { "date-parts": [[2022]] } },
+
+  { "id": "gehlen2021pre", "type": "article",
+    "title": "Tomographic Volumetric Bioprinting of Heterocellular Bone-like Tissues in Seconds",
+    "publisher": "bioRxiv", "DOI": "10.1101/2021.11.14.468504",
+    "issued": { "date-parts": [[2021]] },
+    "note": "Preprint of gehlen2022. Cited for methods detail: GelMA DS by 1H-NMR, 0.22 um PTFE sterile filtration, 405 nm laser dose tests." },
+
+  { "id": "shirahama2016", "type": "article-journal",
+    "title": "Precise Tuning of Facile One-Pot Gelatin Methacryloyl (GelMA) Synthesis",
+    "container-title": "Scientific Reports", "volume": "6", "page": "31036",
+    "DOI": "10.1038/srep31036", "issued": { "date-parts": [[2016]] },
+    "author": [
+      { "family": "Shirahama", "given": "H." }, { "family": "Lee", "given": "B. H." },
+      { "family": "Tan", "given": "L. P." }, { "family": "Cho", "given": "N.-J." } ] },
+
+  { "id": "nguyen2020", "type": "article-journal",
+    "title": "The Photoinitiator Lithium Phenyl (2,4,6-Trimethylbenzoyl) Phosphinate with Exposure to 405 nm Light Is Cytotoxic to Mammalian Cells but Not Mutagenic in Bacterial Reverse Mutation Assays",
+    "container-title": "Polymers", "volume": "12", "issue": "7", "page": "1489",
+    "DOI": "10.3390/polym12071489", "issued": { "date-parts": [[2020]] },
+    "author": [
+      { "family": "Nguyen", "given": "A. K." }, { "family": "Goering", "given": "P. L." },
+      { "family": "Elespuru", "given": "R. K." }, { "family": "Sarkar Das", "given": "S." },
+      { "family": "Narayan", "given": "R. J." } ] },
+
+  { "id": "gccp2", "type": "article-journal",
+    "title": "Guidance document on Good Cell and Tissue Culture Practice 2.0 (GCCP 2.0)",
+    "container-title": "ALTEX", "URL": "https://pubmed.ncbi.nlm.nih.gov/34882777/",
+    "issued": { "date-parts": [[2021]] } }
+]

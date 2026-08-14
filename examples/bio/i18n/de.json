@@ -1,0 +1,12 @@
+{
+  "lang": "de",
+  "source": "en-US",
+  "note": "Illustrative partial translation. Keys are {resource-id}.{key-or-region}.{attribute}. The authoritative text is in the model part, in the language declared by <model xml:lang>.",
+  "strings": {
+    "18.gelma-yield.summary": "Für die hauseigene GelMA-Synthese wurde keine isolierte Ausbeute erfasst; in der herangezogenen Literatur war ebenfalls keine berichtet.",
+    "18.gelma-yield.action": "Das lyophilisierte Produkt gegen die Gelatine-Einwaage wiegen und als isolierte Ausbeute erfassen.",
+    "18.vol-dose-threshold.summary": "Optische Leistung und Gesamtlichtdosis sind für diese Harzcharge unbestimmt; die gedruckte Geometrie ist ohne sie nicht reproduzierbar.",
+    "18.lap-inchikey.summary": "Der von Chemikalien-Aggregatoren üblicherweise angegebene InChIKey für LAP stimmt nicht mit der von denselben Anbietern genannten Salzformel überein.",
+    "17.AU.note": "Siehe offenen Punkt 'reg-au-class' - gewebetechnisch hergestellte Produkte werden je nach Manipulationsgrad und Risiko typischerweise als Biologika der Klasse 3 oder 4 eingestuft; die Klasse für dieses Konstrukt wurde nicht bestimmt."
+  }
+}

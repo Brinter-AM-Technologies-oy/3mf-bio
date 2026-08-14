@@ -1,0 +1,52 @@
+BSD 2-Clause License
+
+Copyright (c) 2026, Brinter AM Technologies Oy
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+---
+
+NOTE ON THE SCHEMA FILES
+
+spec/bio.xsd, spec/bio.libxml.xsd and spec/bio.sch are additionally released into the
+public domain under CC0 1.0.
+
+This is deliberate. A schema gets embedded in tools, generated code, and other people's
+formats, and an attribution requirement on it is friction that serves nobody. Take them,
+change them, ship them, fork the vocabulary, build something incompatible. No attribution
+required and no permission needed.
+
+Attribution is still appreciated, and if you extend the vocabulary usefully we would rather
+hear about it than not.
+
+NOTE ON THE DOCUMENTATION
+
+The specification prose and dossiers in spec/ and dossier/ are additionally offered
+under CC BY 4.0, so they can be quoted and adapted in academic work with attribution.
+
+The 3MF Consortium's own specifications, from which this schema borrows structure and
+conventions, carry their own licence and disclaimer; see 3mf.io. This project is not
+affiliated with them.
+
+The dossiers cite third-party standards and publications. Citation is not
+redistribution: ISO, ASTM and other standards remain the copyright of their
+publishers and must be obtained from them.

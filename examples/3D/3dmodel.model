@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ILLUSTRATIVE 3MF package part  -  /3D/3dmodel.model
+  Demonstrates the 3MF Bio Extension. Values with provenance="cited" are the referenced
+  study's reported values. Values marked TODO-VERIFY are placeholders for a lab's own data
+  and have NOT been back-filled from any other source.
+-->
+<model unit="millimeter" xml:lang="en-US"
+	xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"
+	xmlns:b="https://3mfbio.com/ns/bio/2026/07"
+	xmlns:v="http://schemas.3mf.io/3dmanufacturing/volumetric/2022/01"
+	requiredextensions="b">
+
+	<metadata name="Title">Perfusable bone-like construct (illustrative)</metadata>
+	<metadata name="Application">3MF Bio Extension reference example</metadata>
+	<metadata name="b:SpecVersion">0.9.0</metadata>
+	<metadata name="b:Conformance">Bio-Core</metadata>
+
+	<resources>
+
+		<!-- ============ Evidence (id 1) ============
+		     Referenced from every cited parameter as evid="1" evindices="i j".
+		     Indices are 0-based in document order, per 3MF group convention. -->
+		<b:evidence id="1" path="/bio/references.json">
+			<b:reference key="bernal2019"    kind="peer-reviewed" doi="10.1002/adma.201904209" grade="B"/><!-- 0 -->
+			<b:reference key="gehlen2021pre" kind="preprint"      doi="10.1101/2021.11.14.468504" grade="D"/><!-- 1 -->
+			<b:reference key="gehlen2022"    kind="peer-reviewed" url="https://www.sciencedirect.com/science/article/pii/S1742706122003580" grade="B"/><!-- 2 -->
+			<b:reference key="bernal2022"    kind="peer-reviewed" doi="10.1002/adma.202110054" grade="B"/><!-- 3 -->
+			<b:reference key="shirahama2016" kind="peer-reviewed" doi="10.1038/srep31036" grade="B"/><!-- 4 -->
+			<b:reference key="nguyen2020"    kind="peer-reviewed" doi="10.3390/polym12071489" grade="B"/><!-- 5 -->
+			<b:reference key="astmF3659"     kind="standard"      stdno="ASTM F3659-24" grade="A"/><!-- 6 -->
+			<b:reference key="gccp2"         kind="standard"      url="https://pubmed.ncbi.nlm.nih.gov/34882777/" grade="A"/><!-- 7 -->
+			<b:reference key="groll2019"     kind="peer-reviewed" doi="10.1088/1758-5090/aaec52" grade="A"/><!-- 8 -->
+		</b:evidence>
+
+		<!-- ============ Substances (id 2) ============ -->
+		<b:substances id="2">
+
+			<!-- index 0: modified in-house, so a synthesis record is REQUIRED (rule S2) -->
+			<b:substance name="Gelatin methacryloyl (GelMA), type A porcine" role="polymer">
+				<b:identity kind="biological" casrn="" iupac="" formula="" inchikey="" chebi="" mw="" mwunit="g/mol"/>
+				<b:synthesis route="one-pot methacryloylation of gelatin with methacrylic anhydride" evid="1" evindices="4">
+					<b:step index="0" op="dissolve" reagent="gelatin type A, porcine skin"
+						note="in carbonate-bicarbonate buffer">
+						<b:param name="cb_buffer_molarity" unit="mol/L"  setpoint="0.25" provenance="cited" evid="1" evindices="4"/>
+						<b:param name="initial_pH"         unit="1"      setpoint="9"    provenance="cited" evid="1" evindices="4"/>
+						<b:param name="gelatin_conc"       unit="%{w/v}" setpoint="10"   provenance="cited" evid="1" evindices="4"
+							note="reported optimal window 10-20%"/>
+						<b:param name="reaction_temp"      unit="Cel"    setpoint="50"   provenance="cited" evid="1" evindices="4"/>
+					</b:step>
+					<b:step index="1" op="add-reagent" reagent="methacrylic anhydride" note="single one-pot addition">
+						<b:param name="feed_ratio_MAA_gelatin" unit="mL/g" setpoint="0.1" provenance="cited" evid="1" evindices="4"/>
+						<b:param name="reaction_time"          unit="min"  setpoint="60"  provenance="cited" evid="1" evindices="4"
+							note="1 h originally; 1-3 h in later studies; pH drops sharply to 6.6 early"/>
+					</b:step>
+					<b:step index="2" op="dialyse" note="against deionised water"/>
+					<b:step index="3" op="sterile-filter" note="PTFE membrane">
+						<b:param name="filter_pore_size" unit="um" setpoint="0.22" provenance="cited" evid="1" evindices="1"/>
+					</b:step>
+					<b:step index="4" op="lyophilise"/>
+					<!-- Rule S3: emitted even though unknown. Absent is not the same claim as unmeasured. -->
+					<b:yield kind="isolated" unit="%" measured="" provenance="estimated"
+						note="TODO-VERIFY - no isolated yield figure found in the consulted sources; measure and record"/>
+					<b:verification assay="1H-NMR" endpoint="degree_of_substitution" unit="%"
+						measured="57" provenance="cited" evid="1" evindices="1"
+						method="lysine methylene integration 2.87-3.00 ppm in GelMA vs unmodified gelatin; phenylalanine 7.1-7.4 ppm internal reference; 400 MHz, D2O"/>
+					<b:verification assay="TNBS" endpoint="free_amine_content" unit="1"
+						measured="" provenance="estimated" evid="1" evindices="4"
+						method="colourimetric amine quantification, run alongside NMR because NMR requires known amine content"/>
+				</b:synthesis>
+				<b:grade purity="" endotoxin="" endotoxinunit="[IU]/mg" sterility="filtered-0.22um"
+					supplier="in-house" lot="ILLUSTRATIVE-LOT-001" coa="/bio/coa/gelma_lot001.pdf"/>
+			</b:substance>
+
+			<!-- index 1: commercial and CAS-registered, so no synthesis record needed (rule S1) -->
+			<b:substance name="LAP" role="photoinitiator">
+				<!-- inchikey computed from the isomeric SMILES of PubChem CID 68384915 and
+				     cross-checked: the resulting InChI string matches two independent registry
+				     listings character-for-character. See openitem 'lap-inchikey' - the
+				     InChIKey most often copied from aggregators, CVDUWYDMNPODNA-UHFFFAOYSA-N,
+				     is the NEUTRAL form (suffix -N, formula C16H17O3P.Li.H) and does NOT
+				     correspond to the salt formula these same vendors state. -->
+				<b:identity kind="pure" casrn="85073-19-4"
+					iupac="lithium phenyl-2,4,6-trimethylbenzoylphosphinate"
+					formula="C16H16LiO3P"
+					inchikey="JUYQFRXNMVWASF-UHFFFAOYSA-M"
+					smiles="[Li+].CC1=CC(=C(C(=C1)C)C(=O)P(=O)(C2=CC=CC=C2)[O-])C"
+					pubchemcid="68384915"
+					mw="294.21" mwunit="g/mol" chebi=""/>
+				<b:grade purity="95" supplier="" lot="ILLUSTRATIVE-LOT-002" coa="/bio/coa/lap_lot002.pdf"/>
+				<b:hazard ghs="" hstatement=""
+					note="Generates free radicals on illumination; toxicity is only meaningful WITH light exposure. 10 min at 9.6 mW/cm2 405 nm fully crosslinked 10 wt% GelMA with more than 3.4 mmol/L LAP and was cytotoxic to M-1 cells, though not mutagenic in bacterial reverse mutation assays."/>
+			</b:substance>
+
+			<!-- index 2: a mixture has no single CAS, so supplier+lot carries traceability (rule S1a) -->
+			<b:substance name="Phosphate buffered saline" role="buffer">
+				<b:identity kind="mixture" casrn=""/>
+				<b:grade supplier="ILLUSTRATIVE-SUPPLIER" lot="ILLUSTRATIVE-LOT-003" sterility="sterile"/>
+			</b:substance>
+		</b:substances>
+
+		<!-- ============ Cell populations (id 3) ============ -->
+		<b:cellpopulations id="3">
+			<b:cellpopulation name="Human bone-marrow-derived mesenchymal stromal cells"><!-- index 0 -->
+				<b:origin kind="primary" rrid="" celltype="" uberon="" taxon="9606"
+					donorage="" donorsex="" bank=""
+					ethicsref="ILLUSTRATIVE - insert IRB/ethics approval reference"/>
+				<!-- Rule C2: mycoplasma record required for every population, whatever its kind -->
+				<b:authentication assay="mycoplasma" method="PCR" date="2026-06-01" result="negative"
+					report="/bio/coa/myco_20260601.pdf"/>
+				<b:authentication assay="flow" method="surface marker panel" date="2026-06-02"
+					result="pending" report=""/>
+				<b:culture medium="ILLUSTRATIVE" basal="" serum="10" serumlot="ILLUSTRATIVE-FBS-LOT"
+					antibiotics="none" substrate="tissue-culture polystyrene" dissociation="">
+					<b:param name="passage_at_print" unit="1"   measured="4"  provenance="measured" n="1"/>
+					<b:param name="atmosphere_CO2"   unit="%"   setpoint="5"  measured="5"  provenance="measured" method="incubator sensor"/>
+					<b:param name="atmosphere_O2"    unit="%"   setpoint="21" measured="21" provenance="measured" method="ambient"
+						note="recorded explicitly - normoxia is a choice, not a default"/>
+					<b:param name="incubator_temp"   unit="Cel" setpoint="37" measured="37" provenance="measured"/>
+				</b:culture>
+			</b:cellpopulation>
+		</b:cellpopulations>
+
+		<!-- ============ Bioink property group (id 4) ============
+		     Referenced from <object pid="4" pindex="n"> and from <triangle pid p1 p2 p3>,
+		     exactly as core property groups are. -->
+		<b:bioinkgroup id="4">
+			<b:bioink name="5% GelMA / 0.05% LAP bioresin" class="bioresin" displaycolor="#E8A33D"><!-- index 0 -->
+				<b:component substanceid="2" substanceindex="0" value="5"    unit="%{w/v}" provenance="cited" evid="1" evindices="2"/>
+				<b:component substanceid="2" substanceindex="1" value="0.05" unit="%{w/v}" provenance="cited" evid="1" evindices="2"/>
+				<b:component substanceid="2" substanceindex="2" value="100"  unit="%{v/v}" provenance="cited" evid="1" evindices="0"/>
+				<!-- Graded load: the density is a volumetric field, not a scalar (rule F3) -->
+				<b:cellload cellpopid="3" cellpopindex="0" fieldid="15"
+					provenance="derived" method="see fieldbinding 15" n="3"/>
+				<b:crosslink mechanism="photo-chain-growth" agentid="2" agentindex="1" wavelength="405" stage="in-process">
+					<b:param name="photoinitiator_conc" unit="%{w/v}" setpoint="0.05" provenance="cited" evid="1" evindices="2"/>
+				</b:crosslink>
+				<b:rheology model="Herschel-Bulkley">
+					<b:param name="yield_stress"        unit="Pa"   measured="" provenance="estimated" note="TODO-VERIFY"/>
+					<b:param name="consistency_K"       unit="Pa.s" measured="" provenance="estimated" note="TODO-VERIFY"/>
+					<b:param name="flow_index_n"        unit="1"    measured="" provenance="estimated" note="TODO-VERIFY"/>
+					<!-- Rule I2: without this the other three are uninterpretable -->
+					<b:param name="temp_of_measurement" unit="Cel"  setpoint="37" measured="37" provenance="measured"/>
+				</b:rheology>
+			</b:bioink>
+		</b:bioinkgroup>
+
+		<!-- ============ Volumetric field (id 14) + bio binding (id 15) ============
+		     The 3MF Volumetric Extension carries the FIELD. The bio extension carries what
+		     the field MEANS: which quantity, in what units, on whose authority. Neither
+		     duplicates the other, and the evidence rule reaches graded quantities too.
+
+		     The function resource referenced by functionid (an implicit function or a
+		     <v:functionfromimage3d> over an image stack) is defined per the Volumetric and
+		     Implicit extensions and is elided here; this example specifies only the bio side.
+		     TODO-VERIFY: the exact attribute by which a <mesh> attaches a <v:volumedata>
+		     resource is governed by the Volumetric Extension and was not confirmed here. -->
+		<v:volumedata id="14">
+			<v:property name="bio_cell_density" functionid="99" channel="density"/>
+		</v:volumedata>
+
+		<b:fieldbinding id="15" volumeid="14" property="bio_cell_density"
+			quantity="cell_density" unit="/mL"
+			provenance="derived"
+			method="design-intent gradient: 1e6/mL at the construct periphery rising to 8e6/mL in the osteogenic core"
+			evid="1" evindices="2"
+			note="TODO-VERIFY - replace with the field actually measured post-print">
+			<b:maps bioinkid="4" bioinkindex="0"/>
+			<b:range min="1000000" max="8000000" fallback="2000000"/>
+		</b:fieldbinding>
+
+		<!-- ============ Process (id 5) ============ -->
+		<b:process id="5" modality="volumetric-tomographic"
+			iso52900="VPP"
+			calibrationid="16" regulatoryid="17"
+			evid="1" evindices="0 1 2">
+			<b:machine vendor="" model="" firmware="" serial="" calibrationdate=""/>
+			<b:parameters>
+				<b:param name="light_wavelength"        unit="nm"     setpoint="405" provenance="cited" evid="1" evindices="1"/>
+				<b:param name="optical_power"           unit="mW"     setpoint=""    provenance="estimated" note="TODO-VERIFY - establish by dose test"/>
+				<b:param name="total_light_dose"        unit="mJ/cm2" setpoint=""    provenance="derived" evid="1" evindices="1"
+					method="dose = optical power x exposure time / illuminated area; threshold from per-resin dose test"
+					note="TODO-VERIFY - dose test: irradiate spots into a cuvette of solidified resin over 2-64 s at varying average power"/>
+				<b:param name="print_duration"          unit="s"      setpoint="30"  provenance="cited" evid="1" evindices="2"/>
+				<b:param name="rotation_speed"          unit="1/min"  setpoint=""    provenance="estimated" note="TODO-VERIFY"/>
+				<b:param name="number_of_projections"   unit="1"      setpoint=""    provenance="estimated" note="TODO-VERIFY"/>
+				<b:param name="vial_diameter"           unit="mm"     setpoint=""    provenance="estimated" note="TODO-VERIFY"/>
+				<b:param name="resin_refractive_index"  unit="1"      measured=""    provenance="estimated" evid="1" evindices="3"
+					note="TODO-VERIFY - scattering raises dose adjacent to the target and its mean free path is inversely related to cell density, so this is cell-density dependent"/>
+				<b:param name="build_temp"              unit="Cel"    setpoint="37" measured="37" provenance="measured"/>
+				<b:param name="sterility_method"        unit="1"      setpoint="aseptic-assembly" measured="aseptic-assembly" provenance="measured"/>
+				<b:param name="cell_viability_post_print" unit="%"    measured="90"  provenance="cited" evid="1" evindices="2"
+					note="reported as greater than 90% for this formulation at 30 s"/>
+			</b:parameters>
+			<b:environment>
+				<b:param name="chamber_temp"          unit="Cel" measured="" provenance="estimated" note="TODO-VERIFY"/>
+				<b:param name="chamber_RH"            unit="%"   measured="" provenance="estimated" note="TODO-VERIFY"/>
+				<b:param name="time_out_of_incubator" unit="min" measured="" provenance="estimated"
+					note="TODO-VERIFY - cumulative excursion is a common uncontrolled variable"/>
+			</b:environment>
+			<b:toolpath path="/bio/toolpath/projections.bin" dialect="x-tomographic-projection-stack"
+				checksum="sha256:980094cc5b0623fab669333f09fac00304c7e6f7afed957f1c26acb147f19402">
+				<b:commandmap>
+					<b:cmd code="PROJ {n}"  means="projection_index" unit="1"/>
+					<b:cmd code="ROT {deg}" means="vial_rotation"    unit="deg"/>
+				</b:commandmap>
+			</b:toolpath>
+		</b:process>
+
+		<!-- ============ Protocols (ids 6-9) ============ -->
+		<b:protocol id="6" stage="pre-print"  title="GelMA reconstitution and cell encapsulation" path="/bio/protocols/encapsulation.md"/>
+		<b:protocol id="7" stage="post-print" title="Resin flush-out and post-cure"               path="/bio/protocols/postcure.md"/>
+		<b:protocol id="8" stage="culture"    title="14-day maturation culture"                   path="/bio/protocols/culture.md"/>
+		<b:protocol id="9" stage="assay"      title="Live/dead viability imaging and quantification"
+			path="/bio/protocols/viability.md" evid="1" evindices="6"/>
+
+		<!-- ============ Results (id 10) ============ -->
+		<b:results id="10">
+			<b:result endpoint="cell_viability_post_print" acceptance="&gt;= 80%" timepoint="24 h"
+				path="/bio/results/viability_24h.csv" targetid="5">
+				<b:param name="viability" unit="%" measured="" provenance="estimated"
+					method="calcein-AM / ethidium homodimer, confocal, 3 fields per construct"
+					note="TODO-VERIFY - ILLUSTRATIVE placeholder for the lab's own measurement"/>
+			</b:result>
+			<b:result endpoint="compressive_modulus" acceptance="&lt; 5 kPa" timepoint="0 h"
+				path="/bio/results/mechanics.csv" targetid="4" targetindex="0">
+				<b:param name="compressive_modulus" unit="kPa" measured="" provenance="estimated"
+					note="TODO-VERIFY - target soft matrix below 5 kPa"/>
+				<b:param name="test_temp" unit="Cel" setpoint="37" measured="37" provenance="measured"/>
+			</b:result>
+		</b:results>
+
+		<!-- ============ Calibration (id 16) ============
+		     Calibration is a dated event with an operator and a pass/fail outcome, not a
+		     machine attribute. The geometric test binds to a printed artefact object, so
+		     the coupon that evidenced the calibration is part of the same build record. -->
+		<b:calibration id="16" modality="volumetric-tomographic"
+			performed="2026-06-05" operator="ILLUSTRATIVE"
+			standard="ISO/ASTM 52902:2023">
+
+			<b:test name="dose_threshold" kind="dosimetric" metric="threshold_dose"
+				unit="mJ/cm2" acceptance="within +/-10% of the value recorded for this resin lot"
+				measured="" outcome="not-performed" frequency="per-resin-lot"
+				evid="1" evindices="1"
+				method="irradiate spots into a cuvette of solidified resin over 2-64 s at varying average power; the shortest exposure producing a solid spot defines the threshold"
+				note="see openitem 'vol-dose-threshold'"/>
+
+			<b:test name="optical_power_at_vial" kind="optical" metric="optical_power"
+				unit="mW" acceptance="within +/-5% of setpoint"
+				measured="" outcome="not-performed" frequency="per-session"
+				method="power meter at the vial position, laser at printing setpoint"/>
+
+			<b:test name="geometric_capability" kind="geometric" metric="dimensional_deviation"
+				unit="um" acceptance="&lt;= 100 um on linear features"
+				measured="" outcome="not-performed" frequency="monthly"
+				artifactobjectid="13" stdref="ISO/ASTM 52902:2023"
+				method="benchmark artefact printed in the build resin and measured; the standard covers both capability assessment and calibration"/>
+
+			<b:test name="resin_transmittance" kind="optical" metric="optical_density"
+				unit="1" acceptance="record only; no threshold asserted"
+				measured="" outcome="not-performed" frequency="per-resin-lot"
+				method="spectrophotometer at the printing wavelength"
+				note="cell-laden resins scatter; this is why dose is per-lot and per-cell-density"/>
+		</b:calibration>
+
+		<!-- ============ Regulatory context (id 17) ============
+		     Structured so the same construct can be re-read against another jurisdiction
+		     without rewriting the dossier. The determination attribute records HOW the
+		     classification was arrived at, which is usually the contested part. -->
+		<b:regulatory id="17" intendeduse="research-only"
+			contactduration="none" contactnature="none">
+
+			<b:jurisdiction region="US" framework="research-use-only"
+				instrument="21 CFR 1271 (not engaged at this intended use)"
+				authority="FDA" determination="self-assessed"
+				determinedby="ILLUSTRATIVE" determineddate="2026-06-10"
+				note="Research-use-only constructs are not HCT/Ps placed into a human. If intended use changes to implantable, re-run this determination: more-than-minimally-manipulated cells move the product to PHS Act 351 biologics via CBER, and a scaffold component may make it a combination product requiring a Request for Designation.">
+				<b:obligation ref="21 CFR 1271 subpart C (donor eligibility)" status="not-applicable"
+					note="not applicable at research-use-only"/>
+				<b:obligation ref="21 CFR 1271 subpart D (cGTP)" status="not-applicable"/>
+			</b:jurisdiction>
+
+			<b:jurisdiction region="EU" framework="research-use-only"
+				instrument="Regulation (EC) No 1394/2007 (not engaged at this intended use)"
+				authority="EMA" determination="self-assessed"
+				determinedby="ILLUSTRATIVE" determineddate="2026-06-10"
+				note="If intended use becomes clinical, a substantially manipulated cell product presented for tissue regeneration and containing an integral scaffold acting as a device falls within the tissue-engineered combined ATMP definition at Article 2(1)(d) of Regulation (EC) No 1394/2007, with the device part assessed against Regulation (EU) 2017/745.">
+				<b:obligation ref="Regulation (EC) No 1394/2007 Art. 2(1)(d)" status="not-applicable"
+					title="combined ATMP definition"/>
+				<b:obligation ref="Regulation (EU) 2017/745 (MDR)" status="not-applicable"
+					title="device component conformity"/>
+			</b:jurisdiction>
+
+			<b:jurisdiction region="AU" framework="research-use-only"
+				instrument="Australian Regulatory Guidelines for Biologicals"
+				authority="TGA" determination="undetermined"
+				note="see openitem 'reg-au-class' - tissue-engineered products are typically Class 3 or Class 4 biologicals depending on manipulation and risk; the class for this construct has not been determined"/>
+
+			<b:standardref stdno="ISO 10993-1" applies="clinical-investigation|implantable"
+				status="not-applicable"
+				title="Biological evaluation of medical devices - evaluation and testing within a risk management process"
+				note="engaged only if intended use changes; contactduration and contactnature above are the inputs to its categorisation"/>
+			<b:standardref stdno="ASTM F3659-24" applies="all" status="partial"
+				title="Standard Guide for Bioinks Used in Bioprinting"
+				note="post-print viability recorded; sterility and full cytocompatibility panel not yet run"/>
+			<b:standardref stdno="ISO/ASTM 52900:2021" applies="all" status="met"
+				title="Additive manufacturing - fundamentals and vocabulary"
+				note="process categorised as VPP via the iso52900 attribute on process 5"/>
+			<b:standardref stdno="ISO/ASTM 52902:2023" applies="all" status="partial"
+				title="Test artefacts - geometric capability assessment"
+				note="artefact defined as object 13; measurement not yet performed"/>
+		</b:regulatory>
+
+		<!-- ============ Open items (id 18) ============
+		     Every unknown, unverified or placeholder value in this package, as data rather
+		     than as a comment. A comment is lost on round-trip and cannot be counted,
+		     filtered, assigned or closed. These can. -->
+		<b:openitems id="18">
+
+			<b:openitem key="lap-inchikey" kind="disputed" severity="minor" status="resolved"
+				raised="2026-06-02" resolved="2026-07-30"
+				summary="The InChIKey commonly listed for LAP by chemical aggregators does not match the salt formula those same aggregators state."
+				action="Recompute the InChIKey from the isomeric SMILES of PubChem CID 68384915 and cross-check the resulting InChI against independent registry listings."
+				resolution="Correct key for the salt (C16H16LiO3P) is JUYQFRXNMVWASF-UHFFFAOYSA-M. The widely-copied CVDUWYDMNPODNA-UHFFFAOYSA-N carries the -N suffix denoting the neutral species and derives from C16H17O3P.Li.H. The computed InChI matches two independent registry listings exactly.">
+				<b:affects targetid="2" targetindex="1"/>
+			</b:openitem>
+
+			<b:openitem key="gelma-yield" kind="unmeasured" severity="material" status="open"
+				raised="2026-06-02"
+				summary="No isolated yield was recorded for the in-house GelMA synthesis, and none was found reported in the consulted literature."
+				action="Weigh the lyophilised product against the gelatin input and record as an isolated yield."
+				owner="ILLUSTRATIVE">
+				<b:affects targetid="2" targetindex="0"/>
+			</b:openitem>
+
+			<b:openitem key="gelma-rheology" kind="unmeasured" severity="blocking" status="open"
+				raised="2026-06-02"
+				summary="Herschel-Bulkley constants for the bioresin are unmeasured, so no shear or flow quantity can be derived."
+				action="Run an amplitude sweep and a flow curve at the printing temperature and record yield stress, consistency index and flow index."
+				owner="ILLUSTRATIVE">
+				<b:affects targetid="4" targetindex="0" paramname="yield_stress"/>
+				<b:affects targetid="4" targetindex="0" paramname="consistency_K"/>
+				<b:affects targetid="4" targetindex="0" paramname="flow_index_n"/>
+			</b:openitem>
+
+			<b:openitem key="vol-dose-threshold" kind="unmeasured" severity="blocking" status="open"
+				raised="2026-06-02"
+				summary="Optical power and total light dose are undetermined for this resin lot; the printed geometry cannot be reproduced without them."
+				action="Run the per-resin dose test described in calibration test 'dose_threshold' and record optical_power and total_light_dose."
+				evid="1" evindices="1" owner="ILLUSTRATIVE">
+				<b:affects targetid="5" paramname="optical_power"/>
+				<b:affects targetid="5" paramname="total_light_dose"/>
+			</b:openitem>
+
+			<b:openitem key="vol-geometry-params" kind="unmeasured" severity="material" status="open"
+				raised="2026-06-02"
+				summary="Rotation speed, projection count and vial diameter are not recorded."
+				action="Read from the machine job file after the next print and record."
+				owner="ILLUSTRATIVE">
+				<b:affects targetid="5" paramname="rotation_speed"/>
+				<b:affects targetid="5" paramname="number_of_projections"/>
+				<b:affects targetid="5" paramname="vial_diameter"/>
+			</b:openitem>
+
+			<b:openitem key="vol-scattering" kind="unmeasured" severity="material" status="open"
+				raised="2026-06-02"
+				summary="Resin refractive index is unrecorded. Scattering raises dose adjacent to the target volume and its mean free path is inversely related to cell density, so dose calibration is cell-density dependent."
+				action="Measure refractive index at the printing wavelength at the working cell density, or record a refractive-index-matching step."
+				evid="1" evindices="3">
+				<b:affects targetid="5" paramname="resin_refractive_index"/>
+			</b:openitem>
+
+			<b:openitem key="env-excursion" kind="unmeasured" severity="minor" status="open"
+				raised="2026-06-02"
+				summary="Chamber conditions and cumulative time out of incubator are not logged."
+				action="Log chamber temperature and humidity, and total excursion time, for each build.">
+				<b:affects targetid="5" paramname="chamber_temp"/>
+				<b:affects targetid="5" paramname="chamber_RH"/>
+				<b:affects targetid="5" paramname="time_out_of_incubator"/>
+			</b:openitem>
+
+			<b:openitem key="cell-identity" kind="unavailable" severity="material" status="open"
+				raised="2026-06-02"
+				summary="Donor metadata, Cell Ontology term and UBERON tissue term are unpopulated for the hMSC population, and the ethics reference is a placeholder."
+				action="Populate donor age and sex from the tissue bank record, assign CL and UBERON terms, and insert the real IRB approval reference.">
+				<b:affects targetid="3" targetindex="0"/>
+			</b:openitem>
+
+			<b:openitem key="machine-identity" kind="placeholder" severity="material" status="open"
+				raised="2026-06-02"
+				summary="Machine vendor, model, firmware, serial and calibration date are empty, so the process cannot be attributed to a specific instrument."
+				action="Populate from the machine nameplate and the calibration log.">
+				<b:affects targetid="5"/>
+			</b:openitem>
+
+			<b:openitem key="results-placeholder" kind="placeholder" severity="blocking" status="open"
+				raised="2026-06-02"
+				summary="Post-print viability and compressive modulus are declared with acceptance criteria but carry no measurements, so neither acceptance criterion has been evaluated."
+				action="Run the viability and mechanics assays and record measured values with replicate counts.">
+				<b:affects targetid="10"/>
+				<b:affects targetid="10" paramname="viability"/>
+				<b:affects targetid="10" paramname="compressive_modulus"/>
+			</b:openitem>
+
+			<b:openitem key="field-measured" kind="placeholder" severity="material" status="open"
+				raised="2026-07-28"
+				summary="The cell-density field records design intent, not a measured distribution."
+				action="Image the construct post-print and replace the binding with a measured field, or add a second binding for the measured distribution."
+				owner="ILLUSTRATIVE">
+				<b:affects targetid="15"/>
+			</b:openitem>
+
+			<b:openitem key="vol-attach-attribute" kind="unverified" severity="material" status="open"
+				raised="2026-07-28"
+				summary="The attribute by which a core object attaches a v:volumedata resource is defined by the 3MF Volumetric Extension and was not confirmed from the primary specification text, which could not be retrieved in full."
+				action="Read the Volumetric Extension specification and attach volumedata 14 to the parenchyma object using the attribute it defines."
+				owner="ILLUSTRATIVE">
+				<b:affects targetid="14"/>
+				<b:affects targetid="11"/>
+			</b:openitem>
+
+			<b:openitem key="reg-au-class" kind="unavailable" severity="minor" status="open"
+				raised="2026-07-30"
+				summary="Australian biological class for this construct is undetermined; tissue-engineered products are typically Class 3 or Class 4 depending on manipulation and risk."
+				action="Assess against the Australian Regulatory Guidelines for Biologicals and record the class, or seek TGA advice.">
+				<b:affects targetid="17"/>
+			</b:openitem>
+
+			<b:openitem key="namespace-unregistered" kind="blocked" severity="blocking" status="open"
+				raised="2026-07-25"
+				summary="The bio namespace URI, relationship types and content types follow the 3MF Consortium pattern but are not registered. 3MF Core and its extensions are now ISO/IEC 25422:2025."
+				action="Submit the extension to the 3MF Consortium and obtain a registered namespace before any interoperability claim is made."/>
+
+			<b:openitem key="modality-evidence-thin" kind="out-of-scope" severity="minor" status="open"
+				raised="2026-06-02"
+				summary="Acoustic droplet ejection, magnetic levitation, spheroid bioassembly and in-situ printing are enumerated as modalities but have no required-parameter sets and no assembled evidence base."
+				action="Either assemble the parameter evidence for each, or remove them from the modality enumeration until it exists."/>
+
+			<b:openitem key="endotoxin-threshold" kind="out-of-scope" severity="minor" status="open"
+				raised="2026-06-02"
+				summary="The endotoxin attribute exists but no acceptance threshold is asserted, because the limit is application- and jurisdiction-specific."
+				action="Set a threshold per intended use in the regulatory resource rather than in the schema."/>
+
+			<b:openitem key="timecourse-fields" kind="out-of-scope" severity="minor" status="resolved"
+				raised="2026-07-28" resolved="2026-08-05"
+				summary="A field binding describes one moment. Serial measurement of the same quantity over a culture timecourse had no representation."
+				action="Design a timepoint mechanism for measurements over the maturation period."
+				resolution="Addressed by &lt;b:characterization&gt; with &lt;b:assay&gt; and &lt;b:reading timepoint&gt;, where each reading is one assay at one ISO 8601 offset from the end of printing. Volumetric field bindings themselves remain single-moment; a graded field measured serially would need a field-series resource, which is deferred until someone has the data to justify its shape."/>
+		</b:openitems>
+
+		<!-- ============ Geometry ============
+		     pid/pindex select the bioink from group 4 using the core property mechanism.
+		     No bespoke attribute is needed for ink assignment. -->
+		<object id="11" type="model" name="parenchyma"
+			pid="4" pindex="0"
+			b:processid="5" b:regionrole="parenchyma">
+			<mesh>
+				<vertices><!-- elided --></vertices>
+				<triangles><!-- elided --></triangles>
+			</mesh>
+		</object>
+
+		<object id="12" type="model" name="channels"
+			pid="4" pindex="0"
+			b:processid="5" b:regionrole="vasculature">
+			<mesh>
+				<vertices><!-- elided --></vertices>
+				<triangles><!-- elided --></triangles>
+			</mesh>
+		</object>
+
+		<!-- Printed in the same run solely for destructive testing.
+		     Recording it here is what binds result "compressive_modulus" to this build. -->
+		<object id="13" type="model" name="mechanics coupon"
+			pid="4" pindex="0"
+			b:processid="5" b:regionrole="test-coupon">
+			<mesh>
+				<vertices><!-- elided --></vertices>
+				<triangles><!-- elided --></triangles>
+			</mesh>
+		</object>
+	</resources>
+
+	<build>
+		<item objectid="11" transform="1 0 0 0 1 0 0 0 1 0 0 0"/>
+		<item objectid="12" transform="1 0 0 0 1 0 0 0 1 0 0 0"/>
+		<item objectid="13" transform="1 0 0 0 1 0 0 0 1 12 0 0" b:processid="5"/>
+	</build>
+</model>

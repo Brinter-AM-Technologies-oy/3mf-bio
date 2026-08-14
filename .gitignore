@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Built package artifacts. Both are generated from examples/ and examples-extrusion/ by the
+# CI step and by site/build_site.py, so tracking them would mean a binary that can silently
+# drift from the source it was built from.
+examples-package.3mf
+examples-extrusion-package.3mf
+conformance/
+
+# generated site
+site/_build/

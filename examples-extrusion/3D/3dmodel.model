@@ -1,0 +1,677 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ILLUSTRATIVE 3MF package part  -  /3D/3dmodel.model
+  Extrusion exemplar: a three-head deposition build.
+
+    head 0  pneumatic, conical nozzle    - cell-laden parenchyma
+    head 1  pneumatic, COAXIAL nozzle    - perfusable vasculature, sacrificial core
+    head 2  piston, cylindrical nozzle   - acellular support frame
+
+  This example exists because extrusion is the dominant modality in the field and the
+  volumetric exemplar could not exercise any of it: multi-head tool assignment, nozzle
+  geometry, drive-specific control variables, core-shell channels, or the shear-stress
+  derivation chain.
+
+  Values with provenance="cited" are the referenced study's reported values. Everything
+  marked TEMPLATE or carrying an open item is a placeholder for a laboratory's own data and
+  has NOT been back-filled.
+-->
+<model unit="millimeter" xml:lang="en-US"
+	xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"
+	xmlns:b="https://3mfbio.com/ns/bio/2026/07"
+	requiredextensions="b">
+
+	<metadata name="Title">Multi-head extrusion construct with coaxial vasculature</metadata>
+	<metadata name="Application">3MF Bio Extension extrusion exemplar</metadata>
+	<metadata name="b:SpecVersion">0.9.0</metadata>
+	<metadata name="b:Conformance">Bio-Core</metadata>
+
+	<resources>
+
+		<!-- ============ Evidence (id 1) ============ -->
+		<b:evidence id="1" path="/bio/references.json">
+			<b:reference key="paxton2017"  kind="peer-reviewed" doi="10.1088/1758-5090/aa8dd8" grade="B"/><!-- 0 -->
+			<b:reference key="emmermacher2020" kind="peer-reviewed" doi="10.1088/1758-5090/ab7553" grade="B"/><!-- 1 -->
+			<b:reference key="mueller2020" kind="peer-reviewed" doi="10.1371/journal.pone.0236371" grade="B"/><!-- 2 -->
+			<b:reference key="sarker2022"  kind="peer-reviewed" doi="10.18063/ijb.v8i2.545" grade="B"/><!-- 3 -->
+			<b:reference key="ouyang2016"  kind="peer-reviewed" doi="10.1088/1758-5090/9/1/014102" grade="B"/><!-- 4 -->
+			<b:reference key="ribeiro2017" kind="peer-reviewed" doi="10.1088/1758-5090/aa90e2" grade="B"/><!-- 5 -->
+			<b:reference key="coaxialrev2022" kind="peer-reviewed" doi="10.1088/2516-1091/ac631c" grade="B"/><!-- 6 -->
+			<b:reference key="astmF3659"   kind="standard" stdno="ASTM F3659-24" grade="A"/><!-- 7 -->
+			<b:reference key="iso52902"    kind="standard" stdno="ISO/ASTM 52902:2023" grade="A"/><!-- 8 -->
+			<b:reference key="gccp2"       kind="standard" url="https://pubmed.ncbi.nlm.nih.gov/34882777/" grade="A"/><!-- 9 -->
+		</b:evidence>
+
+		<!-- ============ Substances (id 2) ============ -->
+		<b:substances id="2">
+			<!-- 0 -->
+			<b:substance name="Sodium alginate, medium viscosity" role="polymer">
+				<b:identity kind="biological" casrn="9005-38-3" formula="" inchikey="" chebi=""/>
+				<b:grade purity="" supplier="TEMPLATE" lot="TEMPLATE-ALG-001" sterility="filtered-0.22um"/>
+			</b:substance>
+			<!-- 1 -->
+			<b:substance name="Gelatin, type A porcine" role="polymer">
+				<b:identity kind="biological" casrn="9000-70-8"/>
+				<b:grade supplier="TEMPLATE" lot="TEMPLATE-GEL-001"/>
+			</b:substance>
+			<!-- 2: ionic crosslinker, extruded through the coaxial core -->
+			<b:substance name="Calcium chloride" role="crosslinker">
+				<b:identity kind="pure" casrn="10043-52-4" formula="CaCl2"
+					inchikey="UXVMQQNJUSDDNG-UHFFFAOYSA-L" mw="110.98" mwunit="g/mol"/>
+				<b:grade purity="99" supplier="TEMPLATE" lot="TEMPLATE-CACL-001"/>
+			</b:substance>
+			<!-- 3: fugitive support -->
+			<b:substance name="Pluronic F-127" role="sacrificial">
+				<b:identity kind="mixture" casrn="9003-11-6"/>
+				<b:grade supplier="TEMPLATE" lot="TEMPLATE-PLU-001"/>
+			</b:substance>
+			<!-- 4 -->
+			<b:substance name="Phosphate buffered saline" role="buffer">
+				<b:identity kind="mixture" casrn=""/>
+				<b:grade supplier="TEMPLATE" lot="TEMPLATE-PBS-001" sterility="sterile"/>
+			</b:substance>
+		</b:substances>
+
+		<!-- ============ Cell populations (id 3) ============ -->
+		<b:cellpopulations id="3">
+			<b:cellpopulation name="Human dermal fibroblasts"><!-- 0 -->
+				<b:origin kind="primary" rrid="" celltype="" uberon="" taxon="9606"
+					donorage="" donorsex="" ethicsref="TEMPLATE - insert IRB reference"/>
+				<b:authentication assay="mycoplasma" method="PCR" date="2026-05-20" result="negative"
+					report="/bio/coa/myco_hdf.pdf"/>
+				<b:culture medium="TEMPLATE" serum="10" serumlot="TEMPLATE-FBS"
+					antibiotics="none" substrate="tissue-culture polystyrene">
+					<b:param name="passage_at_print" unit="1" measured="6" provenance="measured"/>
+					<b:param name="atmosphere_CO2" unit="%" setpoint="5" measured="5" provenance="measured"/>
+					<b:param name="atmosphere_O2" unit="%" setpoint="21" measured="21" provenance="measured"
+						method="ambient" note="recorded explicitly - normoxia is a choice"/>
+				</b:culture>
+			</b:cellpopulation>
+			<b:cellpopulation name="Human umbilical vein endothelial cells"><!-- 1 -->
+				<b:origin kind="primary" rrid="" celltype="" uberon="" taxon="9606"
+					ethicsref="TEMPLATE - insert IRB reference"/>
+				<b:authentication assay="mycoplasma" method="PCR" date="2026-05-20" result="negative"
+					report="/bio/coa/myco_huvec.pdf"/>
+				<b:culture medium="TEMPLATE endothelial growth medium" serum="2"
+					serumlot="TEMPLATE-FBS" antibiotics="none" substrate="gelatin-coated">
+					<b:param name="passage_at_print" unit="1" measured="4" provenance="measured"/>
+					<b:param name="atmosphere_O2" unit="%" setpoint="21" measured="21" provenance="measured"/>
+				</b:culture>
+			</b:cellpopulation>
+		</b:cellpopulations>
+
+		<!-- ============ Bioinks (id 4) ============ -->
+		<b:bioinkgroup id="4">
+			<!-- index 0: parenchymal ink, head 0 -->
+			<b:bioink name="Alginate/gelatin, HDF-laden" class="bioink" displaycolor="#C05B4D">
+				<b:component substanceid="2" substanceindex="0" value="4" unit="%{w/v}" provenance="estimated"/>
+				<b:component substanceid="2" substanceindex="1" value="3" unit="%{w/v}" provenance="estimated"
+					note="gelatin as a rheology modifier; 3% w/v in 4% alginate is a reported shape-fidelity optimum"/>
+				<b:component substanceid="2" substanceindex="4" value="100" unit="%{v/v}" provenance="estimated"/>
+				<b:cellload cellpopid="3" cellpopindex="0" density="2000000" unit="/mL"
+					provenance="measured" method="haemocytometer, trypan blue exclusion" n="3"/>
+				<b:crosslink mechanism="ionic" agentid="2" agentindex="2" stage="post"/>
+				<b:rheology model="Herschel-Bulkley">
+					<b:param name="yield_stress" unit="Pa" measured="" provenance="estimated"
+						note="see openitem 'ext-rheology'"/>
+					<b:param name="consistency_K" unit="Pa.s" measured="" provenance="estimated"/>
+					<b:param name="flow_index_n" unit="1" measured="" provenance="estimated"
+						note="a flow index near 0.2 indicates distinct shear thinning"/>
+					<b:param name="temp_of_measurement" unit="Cel" setpoint="25" measured="25"
+						provenance="measured"/>
+				</b:rheology>
+			</b:bioink>
+
+			<!-- index 1: vascular shell ink, head 1 -->
+			<b:bioink name="Alginate shell, HUVEC-laden" class="bioink" displaycolor="#4D7FC0">
+				<b:component substanceid="2" substanceindex="0" value="3" unit="%{w/v}" provenance="estimated"/>
+				<b:component substanceid="2" substanceindex="4" value="100" unit="%{v/v}" provenance="estimated"/>
+				<b:cellload cellpopid="3" cellpopindex="1" density="4000000" unit="/mL"
+					provenance="measured" method="haemocytometer" n="3"/>
+				<b:crosslink mechanism="ionic" agentid="2" agentindex="2" stage="in-process"
+					note="crosslinker delivered through the coaxial core, giving inline gelation at the moment of deposition"/>
+				<b:rheology model="Herschel-Bulkley">
+					<b:param name="yield_stress" unit="Pa" measured="" provenance="estimated"/>
+					<b:param name="consistency_K" unit="Pa.s" measured="" provenance="estimated"/>
+					<b:param name="flow_index_n" unit="1" measured="" provenance="estimated"/>
+					<b:param name="temp_of_measurement" unit="Cel" setpoint="25" measured="25"
+						provenance="measured"/>
+				</b:rheology>
+			</b:bioink>
+
+			<!-- index 2: fugitive support, head 2, no cells -->
+			<b:bioink name="Pluronic F-127 support" class="fugitive" displaycolor="#9AA0A6">
+				<b:component substanceid="2" substanceindex="3" value="27.5" unit="%{w/v}"
+					provenance="cited" evid="1" evindices="6"/>
+				<b:crosslink mechanism="thermal" stage="in-process"
+					note="thermoreversible; liquid when cold, gel when warm - the reverse of a gelatin support bath"/>
+			</b:bioink>
+		</b:bioinkgroup>
+
+		<!-- ============ Printheads (id 5) ============
+		     Multi-head deposition is the norm in extrusion, and the head is where the
+		     nozzle and the drive live. Recording it here rather than as loose parameters
+		     lets a consumer check that the object's ink and the head's loaded ink agree. -->
+		<b:printheads id="5">
+
+			<!-- index 0 -->
+			<b:printhead name="parenchyma head" drive="pneumatic" tool="T0"
+				bioinkid="4" bioinkindex="0" temperaturecontrolled="true">
+				<b:nozzle geometry="conical" innerdiameter="410" length="12.7" unit="um"
+					gauge="22G" material="plastic" taperangle="20"/>
+				<b:param name="cartridge_temp" unit="Cel" setpoint="25" measured="25" provenance="measured"/>
+				<b:param name="extrusion_pressure" unit="kPa" setpoint="" provenance="estimated"
+					note="a conical 0.41 mm nozzle needs less pressure than a 0.25 mm conical or a steel needle of the same bore; see openitem 'ext-pressure'"/>
+			</b:printhead>
+
+			<!-- index 1: coaxial vascular head.
+			     Core carries crosslinker, shell carries the cell-laden ink, so the product
+			     is a hollow perfusable tube gelled at the instant of deposition. -->
+			<b:printhead name="vascular coaxial head" drive="pneumatic" tool="T1"
+				bioinkid="4" bioinkindex="1">
+				<b:nozzle geometry="coaxial" innerdiameter="819" length="12.7" unit="um"
+					material="stainless steel"
+					/>
+				<b:coaxial outerdiameter="3200" unit="um" product="hollow-tube">
+					<b:channel role="core" content="crosslinker" innerdiameter="514" unit="um"
+						substanceid="2" substanceindex="2">
+						<b:param name="core_flow_rate" unit="uL/min" setpoint="" provenance="estimated"/>
+					</b:channel>
+					<b:channel role="shell" content="bioink" innerdiameter="819" unit="um"
+						bioinkid="4" bioinkindex="1">
+						<b:param name="shell_flow_rate" unit="uL/min" setpoint="" provenance="estimated"
+							note="larger shell flow gives thicker fibres"/>
+					</b:channel>
+				</b:coaxial>
+				<b:param name="cartridge_temp" unit="Cel" setpoint="25" measured="25" provenance="measured"/>
+			</b:printhead>
+
+			<!-- index 2: displacement-driven support head. Note the control variable is a
+			     flow rate, not a pressure - which is why the required set differs by drive. -->
+			<b:printhead name="support head" drive="piston" tool="T2"
+				bioinkid="4" bioinkindex="2" temperaturecontrolled="true">
+				<b:nozzle geometry="cylindrical" innerdiameter="250" length="12.7" unit="um"
+					gauge="25G" material="stainless steel"/>
+				<b:param name="cartridge_temp" unit="Cel" setpoint="22" measured="22" provenance="measured"/>
+			</b:printhead>
+		</b:printheads>
+
+		<!-- ============ Process (id 6) ============ -->
+		<b:process id="6" modality="extrusion-coaxial" iso52900="MEX"
+			printheadsid="5" calibrationid="7" regulatoryid="8"
+			evid="1" evindices="1 2 3">
+			<b:machine vendor="TEMPLATE" model="TEMPLATE" firmware="TEMPLATE" serial="TEMPLATE"
+				calibrationdate="2026-05-15"/>
+			<b:parameters>
+				<!-- geometry -->
+				<b:param name="nozzle_inner_diameter" unit="um" setpoint="410" measured="410"
+					provenance="measured" method="optical measurement of the fitted nozzle"/>
+				<b:param name="nozzle_geometry" unit="1" setpoint="conical" measured="conical"
+					provenance="measured"
+					note="peak wall shear stress is lowest in a cylindrical nozzle, but it persists over a longer portion of the nozzle and the mass flow rate is lower at equal pressure and bore, which has been associated with lower viability"/>
+				<b:param name="nozzle_length" unit="um" setpoint="12700" measured="12700"
+					provenance="measured"
+					note="REQUIRED: the wall shear relation is tau_w = dP*R/(2L). Without L there is no derivable shear stress"/>
+				<!-- drive: pneumatic, so the controlled variable is a pressure -->
+				<b:param name="extrusion_pressure" unit="kPa" setpoint="" provenance="estimated"
+					note="see openitem 'ext-pressure'"/>
+				<!-- path -->
+				<b:param name="print_speed" unit="mm/s" setpoint="" provenance="estimated"/>
+				<b:param name="layer_height" unit="um" setpoint="" provenance="estimated"/>
+				<b:param name="strand_spacing" unit="um" setpoint="" provenance="estimated"
+					note="determine visually until strands just overlap, then fix the overlap percentage for reproducible mechanics"/>
+				<b:param name="infill_pattern" unit="1" setpoint="0-90 rectilinear"
+					measured="0-90 rectilinear" provenance="measured"/>
+				<b:param name="raster_angle" unit="1" setpoint="0" measured="0" provenance="measured"/>
+				<b:param name="perimeter_count" unit="1" setpoint="1" measured="1" provenance="measured"/>
+				<b:param name="standoff_height" unit="um" setpoint="" provenance="estimated"/>
+				<b:param name="cartridge_temp" unit="Cel" setpoint="25" measured="25" provenance="measured"/>
+				<b:param name="bed_temp" unit="Cel" setpoint="10" measured="10" provenance="measured"
+					note="cooled bed to hold the fugitive support below its gelation point"/>
+				<!-- coaxial -->
+				<b:param name="core_inner_diameter" unit="um" setpoint="514" measured="514"
+					provenance="measured"/>
+				<b:param name="shell_inner_diameter" unit="um" setpoint="819" measured="819"
+					provenance="measured"/>
+				<b:param name="core_flow_rate" unit="uL/min" setpoint="" provenance="estimated"/>
+				<b:param name="shell_flow_rate" unit="uL/min" setpoint="" provenance="estimated"/>
+				<b:param name="core_shell_ratio" unit="1" setpoint="" provenance="estimated"
+					note="printability of a multimaterial filament depends on the core-to-shell ratio, not only the target outer diameter"/>
+				<!-- derived: inputs above are all present, so this is derivable (rule X1) -->
+				<b:param name="wall_shear_stress_max" unit="kPa" setpoint="" provenance="derived"
+					method="tau_w = dP*R/(2L) with a Herschel-Bulkley velocity profile; maximal at the wall and zero at the centreline"
+					evid="1" evindices="1 2"
+					note="cannot be measured during printing; it is computed from geometry, driving pressure and fitted rheology. Reported viability is around 91% near 5-10 kPa and falls toward 76% above 10 kPa"/>
+				<b:param name="residence_time_in_nozzle" unit="s" setpoint="" provenance="derived"
+					method="nozzle volume divided by volumetric flow rate"
+					evid="1" evindices="1"
+					note="viability falls with increasing flow rate, increasing viscosity, increasing nozzle length or decreasing radius, mediated by shear stress or residence time"/>
+				<!-- common -->
+				<b:param name="build_temp" unit="Cel" setpoint="22" measured="22" provenance="measured"/>
+				<b:param name="print_duration" unit="min" setpoint="" provenance="estimated"/>
+				<b:param name="sterility_method" unit="1" setpoint="aseptic-assembly"
+					measured="aseptic-assembly" provenance="measured"/>
+				<b:param name="cell_viability_post_print" unit="%" measured="" provenance="estimated"/>
+			</b:parameters>
+			<b:environment>
+				<b:param name="chamber_temp" unit="Cel" measured="" provenance="estimated"/>
+				<b:param name="chamber_RH" unit="%" measured="" provenance="estimated"/>
+				<b:param name="time_out_of_incubator" unit="min" measured="" provenance="estimated"/>
+			</b:environment>
+			<b:toolpath path="/bio/toolpath/extrusion.gcode" dialect="gcode-marlin"
+				checksum="sha256:80c9119194b5856e8a28a003053995a62b691769bf9b3f0d9133f30986528fe7">
+				<b:commandmap>
+					<b:cmd code="T{n}" means="select_printhead" unit="1"/>
+					<b:cmd code="M104 T{n} S{x}" means="cartridge_temp" unit="Cel"/>
+					<b:cmd code="M140 S{x}" means="bed_temp" unit="Cel"/>
+					<b:cmd code="M106 P1 S{0-255}" means="crosslink_lamp_power" unit="1"/>
+					<b:cmd code="M400" means="wait_for_moves_complete"/>
+				</b:commandmap>
+			</b:toolpath>
+		</b:process>
+
+		<!-- ============ Calibration (id 7) ============
+		     Extrusion calibration is ink x machine, not machine alone: the same printer
+		     passing a geometric artefact test can still print an unusable construct with a
+		     different formulation. Printability tests must be repeated per formulation. -->
+		<b:calibration id="7" modality="extrusion-coaxial" performed="2026-05-18"
+			operator="TEMPLATE" standard="ISO/ASTM 52902:2023">
+
+			<b:test name="filament_width" kind="printability" metric="strand_width" unit="um"
+				acceptance="TEMPLATE - state your own criterion" outcome="not-performed"
+				frequency="per-ink-lot"
+				method="deposit single strands at the intended pressure and speed; measure by calibrated microscopy"/>
+
+			<b:test name="grid_test" kind="printability" metric="printability_Pr" unit="1"
+				acceptance="TEMPLATE - state your own window" outcome="not-performed"
+				frequency="per-ink-lot" evid="1" evindices="4"
+				method="print a lattice; Pr is derived from the circularity of the enclosed pore and equals 1 for a perfect square, i.e. ideal gelation. Under-gelation gives rounded pores and filament swelling; over-gelation gives lumpy strands and unpredictable geometry"/>
+
+			<b:test name="bridge_test" kind="printability" metric="deflection_angle" unit="1"
+				acceptance="TEMPLATE - state your own maximum deflection"
+				outcome="not-performed" frequency="per-ink-lot"
+				evid="1" evindices="5"
+				method="print filaments spanning pillars at increasing gap; measure deflection angle against half-gap distance. Modelled by the equilibrium between gravitational force on the filament and its resistance to deformation. Record the time at which deflection was measured: collapse continues after deposition, so an immediate reading and a ten-minute reading are different numbers"/>
+
+			<!-- The test the other two cannot substitute for. A bridge test and a grid test
+			     both load ONE layer. What collapses a tall construct is the weight of the
+			     layers above it, and only stacking applies that load. -->
+			<b:test name="layer_stacking_test" kind="printability" metric="wall_thickness_ratio"
+				unit="1" acceptance="TEMPLATE - state your own; 1.0 means no spreading under load"
+				outcome="not-performed" frequency="per-ink-lot"
+				method="print a cylinder to a fixed layer count, then compare wall thickness in the lowest five layers against the highest five. Report the layer height and extrusion width used: a stacking result at one layer height does not transfer to another"
+				note="also record max_stable_height and aspect_ratio against the design"/>
+
+			<b:test name="filament_fusion" kind="printability" metric="fused_length_ratio" unit="1"
+				acceptance="TEMPLATE" outcome="not-performed" frequency="per-ink-lot"
+				evid="1" evindices="5"
+				method="print parallel filaments at decreasing separation; measure fused filament length against filament distance and thickness"/>
+
+			<b:test name="flow_rate_check" kind="flow" metric="volumetric_flow_rate" unit="uL/min"
+				acceptance="TEMPLATE - within your own tolerance of setpoint"
+				outcome="not-performed" frequency="per-session" evid="1" evindices="2"
+				method="extrude to a tared vessel for a fixed time. Flow rate rises highly non-linearly with pressure for shear-thinning inks, so it cannot be inferred from the pressure setting"/>
+
+			<b:test name="core_shell_concentricity" kind="geometric" metric="offset" unit="um"
+				acceptance="TEMPLATE" outcome="not-performed" frequency="per-session"
+				method="cross-section a deposited coaxial filament and measure core offset from the shell centroid"/>
+
+			<b:test name="wall_thickness" kind="geometric" metric="wall_thickness" unit="um"
+				acceptance="TEMPLATE" outcome="not-performed" frequency="per-session"
+				evid="1" evindices="6"
+				method="cross-section; wall thickness and lumen diameter respond to core pressure and sheath flow rate"/>
+
+			<b:test name="geometric_capability" kind="geometric" metric="dimensional_deviation"
+				unit="um" acceptance="TEMPLATE" outcome="not-performed" frequency="monthly"
+				artifactobjectid="14" stdref="ISO/ASTM 52902:2023"
+				method="benchmark artefact printed in the build material, not in a calibration plastic"/>
+		</b:calibration>
+
+		<!-- ============ Regulatory (id 8) ============ -->
+		<b:regulatory id="8" intendeduse="research-only" contactduration="none" contactnature="none">
+			<b:jurisdiction region="US" framework="research-use-only"
+				instrument="21 CFR 1271 (not engaged at this intended use)"
+				authority="FDA" determination="self-assessed"
+				determinedby="TEMPLATE" determineddate="2026-05-15"/>
+			<b:jurisdiction region="EU" framework="research-use-only"
+				instrument="Regulation (EC) No 1394/2007 (not engaged at this intended use)"
+				authority="EMA" determination="self-assessed"
+				determinedby="TEMPLATE" determineddate="2026-05-15"/>
+			<b:standardref stdno="ASTM F3659-24" applies="all" status="partial"
+				title="Standard Guide for Bioinks Used in Bioprinting"/>
+			<b:standardref stdno="ISO/ASTM 52902:2023" applies="all" status="partial"
+				title="Test artefacts - geometric capability assessment"/>
+		</b:regulatory>
+
+		<!-- ============ Results (id 9) ============ -->
+		<b:results id="9">
+			<b:result endpoint="cell_viability_post_print" acceptance="TEMPLATE - state your own floor"
+				timepoint="24 h" path="/bio/results/viability_24h.csv" targetid="6">
+				<b:param name="cell_viability_post_print" unit="%" measured="" provenance="estimated"
+					method="calcein-AM / ethidium homodimer, confocal"/>
+			</b:result>
+			<b:result endpoint="lumen_patency" acceptance="TEMPLATE - perfusable without leakage"
+				timepoint="0 h" targetid="6">
+				<b:param name="wall_thickness" unit="um" measured="" provenance="estimated"/>
+			</b:result>
+		</b:results>
+
+		<!-- ============ Maturation (id 15) ============
+		     A printed construct is not the product; the matured construct is. Everything
+		     above this point describes about a day of work. What follows describes three
+		     weeks, and is where most of the biology actually happens.
+
+		     The perfusion literature notes that circuit parameters - viscosity, flow rate,
+		     frequency, pressure - are "as a group often overlooked" in reporting. Rule Q5
+		     is the response: magnitude, rate and duration are only interpretable together. -->
+		<b:maturation id="15" targetid="11" totalduration="P21D">
+
+			<b:stage index="0" name="recovery" culture="static" from="P0D" to="P2D"
+				purpose="allow the ionically crosslinked matrix to equilibrate before any flow is applied">
+				<b:bioreactor kind="none"/>
+				<b:medium name="TEMPLATE growth medium" basal="DMEM" serum="10"
+					serumlot="TEMPLATE-FBS" exchangeinterval="P1D" exchangevolume="2 mL"/>
+				<b:param name="incubator_temp" unit="Cel" setpoint="37" measured="37" provenance="measured"/>
+				<b:param name="atmosphere_CO2" unit="%" setpoint="5" measured="5" provenance="measured"/>
+				<b:param name="atmosphere_O2" unit="%" setpoint="21" measured="21" provenance="measured"/>
+			</b:stage>
+
+			<b:stage index="1" name="perfusion conditioning" culture="perfusion" from="P2D" to="P14D"
+				purpose="establish flow through the coaxial lumen and expose the endothelium to shear">
+				<b:bioreactor kind="perfusion" vendor="TEMPLATE" model="TEMPLATE"
+					vesselvolume="10" unit="mL"
+					note="circuit is pump, reservoir, tubing, construct vessel and waste vessel; the flow rate is what sets wall shear stress at the construct and thereby the microenvironment">
+					<b:param name="flow_rate" unit="mL/min" setpoint="" provenance="estimated"
+						note="see openitem 'mat-flow'"/>
+					<b:param name="medium_viscosity" unit="1" setpoint="" provenance="estimated"
+						note="circuit viscosity is part of the shear calculation and is usually unreported; physiological blood is around 4 cP"/>
+					<b:param name="circuit_pressure" unit="1" setpoint="" provenance="estimated"/>
+				</b:bioreactor>
+
+				<b:stimulation mode="fluid-shear" onset="P2D" dutycycle="continuous"
+					note="endothelial cells change function under different shear conditions, so the shear level is a specification of the tissue, not an incidental of the plumbing">
+					<b:param name="flow_rate" unit="mL/min" setpoint="" provenance="estimated"/>
+					<b:param name="wall_shear_stress" unit="Pa" setpoint="" provenance="derived"
+						method="computed from lumen radius, flow rate and medium viscosity"
+						note="see openitem 'mat-flow'"/>
+					<b:param name="stimulation_duration" unit="h" setpoint="288" measured="288"
+						provenance="measured" note="12 days continuous"/>
+				</b:stimulation>
+
+				<b:medium name="TEMPLATE endothelial growth medium" basal="EBM-2" serum="2"
+					serumlot="TEMPLATE-FBS" exchangeinterval="P2D" exchangevolume="10 mL"/>
+				<b:param name="incubator_temp" unit="Cel" setpoint="37" measured="37" provenance="measured"/>
+			</b:stage>
+
+			<b:stage index="2" name="mechanical conditioning" culture="perfusion" from="P14D" to="P21D"
+				purpose="add cyclic loading to drive matrix deposition">
+				<b:bioreactor kind="multi-modal" vendor="TEMPLATE" model="TEMPLATE">
+					<b:param name="flow_rate" unit="mL/min" setpoint="" provenance="estimated"/>
+				</b:bioreactor>
+
+				<b:stimulation mode="cyclic-tension" onset="P14D" dutycycle="8 h on, 16 h off"
+					note="a documented regime for 3D-printed scaffolds applied 0.1 Hz at 2000 cycles per day alongside perfusion over 21 days">
+					<b:param name="strain_amplitude" unit="%" setpoint="" provenance="estimated"/>
+					<b:param name="stimulation_frequency" unit="Hz" setpoint="0.1" measured="0.1"
+						provenance="cited" evid="1" evindices="1"/>
+					<b:param name="cycles_per_day" unit="1" setpoint="2000" measured="2000"
+						provenance="cited" evid="1" evindices="1"/>
+				</b:stimulation>
+
+				<b:medium name="TEMPLATE endothelial growth medium" basal="EBM-2" serum="2"
+					serumlot="TEMPLATE-FBS" exchangeinterval="P2D"/>
+			</b:stage>
+		</b:maturation>
+
+		<!-- ============ Characterization (id 16) ============
+		     Assays over time. A single-valued <b:result> cannot say that viability was 92%
+		     at day 1 and 74% at day 21, which is exactly the shape of the information that
+		     decides whether a construct works. -->
+		<b:characterization id="16" targetid="11">
+
+			<b:assay name="viability" domain="viability" endpoint="live_fraction" unit="%"
+				method="calcein-AM / ethidium homodimer, confocal z-stack, 3 fields per construct"
+				destructive="false" acceptance="TEMPLATE - state your own floor"
+				protocolid="17">
+				<b:reading timepoint="P1D"  value="" provenance="estimated" n="3" outcome="not-assessed"/>
+				<b:reading timepoint="P7D"  value="" provenance="estimated" n="3" outcome="not-assessed"/>
+				<b:reading timepoint="P14D" value="" provenance="estimated" n="3" outcome="not-assessed"/>
+				<b:reading timepoint="P21D" value="" provenance="estimated" n="3" outcome="not-assessed"/>
+			</b:assay>
+
+			<b:assay name="compressive_modulus" domain="mechanical" endpoint="E_comp" unit="kPa"
+				method="unconfined compression to 15% strain, 1 mm/min, tangent modulus over 5-10% strain, submerged at 37 C"
+				destructive="true" acceptance="TEMPLATE"
+				note="destructive: each timepoint consumes its own coupon, printed in the same run">
+				<b:reading timepoint="P0D"  value="" provenance="estimated" n="5"/>
+				<b:reading timepoint="P21D" value="" provenance="estimated" n="5"/>
+			</b:assay>
+
+			<b:assay name="strand_fidelity" domain="structural" endpoint="width_deviation" unit="um"
+				method="brightfield microscopy; measured strand width against the designed value"
+				destructive="false" acceptance="TEMPLATE">
+				<b:reading timepoint="P0D" value="" provenance="estimated" n="10"/>
+			</b:assay>
+
+			<b:assay name="pore_size" domain="structural" endpoint="mean_pore_diameter" unit="um"
+				method="microCT segmentation of the hydrated construct"
+				destructive="false" acceptance="TEMPLATE">
+				<b:reading timepoint="P0D"  value="" provenance="estimated" n="3"/>
+				<b:reading timepoint="P21D" value="" provenance="estimated" n="3"
+					note="pore size changes with swelling, degradation and matrix deposition, so a day-0 value alone is not a property of the construct"/>
+			</b:assay>
+
+			<b:assay name="lumen_patency" domain="transport" endpoint="perfusable" unit="1"
+				method="perfuse fluorescent microbeads through the coaxial lumen and image for leakage or blockage"
+				destructive="false" acceptance="TEMPLATE - perfusable without leakage">
+				<b:reading timepoint="P0D"  value="" provenance="estimated"/>
+				<b:reading timepoint="P21D" value="" provenance="estimated"/>
+			</b:assay>
+
+			<b:assay name="endothelial_phenotype" domain="phenotype" endpoint="CD31_positive_fraction"
+				unit="%" method="immunofluorescence for CD31 / PECAM-1, confocal, fraction of DAPI-positive nuclei"
+				destructive="true" acceptance="TEMPLATE"
+				note="the readout that says whether the shear conditioning did anything">
+				<b:reading timepoint="P7D"  value="" provenance="estimated" n="3"/>
+				<b:reading timepoint="P21D" value="" provenance="estimated" n="3"/>
+			</b:assay>
+
+			<b:assay name="collagen_deposition" domain="matrix-deposition" endpoint="collagen_per_dna"
+				unit="1" method="hydroxyproline assay normalised to PicoGreen DNA"
+				destructive="true" acceptance="TEMPLATE">
+				<b:reading timepoint="P21D" value="" provenance="estimated" n="5"/>
+			</b:assay>
+
+			<b:assay name="metabolic_activity" domain="metabolic" endpoint="glucose_consumption"
+				unit="1" method="spent-medium glucose assay at each exchange"
+				destructive="false" acceptance="TEMPLATE - record only, no threshold asserted"
+				note="the cheapest longitudinal signal available; a fall usually precedes anything visible">
+				<b:reading timepoint="P2D"  value="" provenance="estimated"/>
+				<b:reading timepoint="P7D"  value="" provenance="estimated"/>
+				<b:reading timepoint="P14D" value="" provenance="estimated"/>
+				<b:reading timepoint="P21D" value="" provenance="estimated"/>
+			</b:assay>
+
+			<b:assay name="sterility" domain="sterility" endpoint="contamination" unit="1"
+				method="visual inspection and spent-medium turbidity at each exchange"
+				destructive="false" acceptance="TEMPLATE">
+				<b:reading timepoint="P21D" value="" provenance="estimated"/>
+			</b:assay>
+		</b:characterization>
+
+		<b:protocol id="17" stage="assay" title="Live/dead viability imaging and quantification"
+			path="/bio/protocols/viability.md"/>
+		<b:protocol id="18" stage="culture" title="21-day perfusion maturation with cyclic conditioning"
+			path="/bio/protocols/maturation.md"/>
+
+		<!-- ============ Open items (id 10) ============ -->
+		<b:openitems id="10">
+			<b:openitem key="ext-rheology" kind="unmeasured" severity="blocking" status="open"
+				raised="2026-05-15"
+				summary="Herschel-Bulkley constants are unmeasured for both cell-laden inks, so wall shear stress and residence time cannot actually be computed."
+				action="Run a flow curve and an amplitude sweep at the printing temperature and at the working cell density, and record yield stress, consistency index and flow index."
+				owner="TEMPLATE">
+				<b:affects targetid="4" targetindex="0" paramname="yield_stress"/>
+				<b:affects targetid="4" targetindex="0" paramname="consistency_K"/>
+				<b:affects targetid="4" targetindex="0" paramname="flow_index_n"/>
+				<b:affects targetid="4" targetindex="1" paramname="yield_stress"/>
+				<b:affects targetid="4" targetindex="1" paramname="consistency_K"/>
+				<b:affects targetid="4" targetindex="1" paramname="flow_index_n"/>
+			</b:openitem>
+
+			<b:openitem key="ext-pressure" kind="unmeasured" severity="blocking" status="open"
+				raised="2026-05-15"
+				summary="Extrusion pressure, print speed, layer height and strand spacing are unset, so the deposition is undefined."
+				action="Determine by the line-optimisation procedure: vary feedrate, pressure, nozzle bore and standoff height to fix strand dimensions, then set strand spacing visually until strands just overlap and hold that overlap."
+				evid="1" evindices="3" owner="TEMPLATE">
+				<b:affects targetid="6" paramname="extrusion_pressure"/>
+				<b:affects targetid="5" paramname="extrusion_pressure"/>
+				<b:affects targetid="6" paramname="print_speed"/>
+				<b:affects targetid="6" paramname="layer_height"/>
+				<b:affects targetid="6" paramname="strand_spacing"/>
+				<b:affects targetid="6" paramname="standoff_height"/>
+				<b:affects targetid="6" paramname="print_duration"/>
+			</b:openitem>
+
+			<b:openitem key="coax-flows" kind="unmeasured" severity="blocking" status="open"
+				raised="2026-05-15"
+				summary="Core and shell flow rates and their ratio are unset. These, not the nozzle bore alone, determine lumen diameter and wall thickness."
+				action="Sweep core pressure and sheath flow rate; measure lumen diameter, wall thickness and uniformity on cross-sections; record the ratio that meets the acceptance criterion."
+				evid="1" evindices="6" owner="TEMPLATE">
+				<b:affects targetid="6" paramname="core_flow_rate"/>
+				<b:affects targetid="6" paramname="shell_flow_rate"/>
+				<b:affects targetid="5" paramname="core_flow_rate"/>
+				<b:affects targetid="5" paramname="shell_flow_rate"/>
+				<b:affects targetid="6" paramname="core_shell_ratio"/>
+			</b:openitem>
+
+			<b:openitem key="ext-shear" kind="unmeasured" severity="material" status="open"
+				raised="2026-05-15"
+				summary="Wall shear stress and nozzle residence time are declared as derived but cannot be evaluated until the rheology is measured."
+				action="Close 'ext-rheology' and 'ext-pressure', then compute both and record the model used."
+				owner="TEMPLATE">
+				<b:affects targetid="6" paramname="wall_shear_stress_max"/>
+				<b:affects targetid="6" paramname="residence_time_in_nozzle"/>
+			</b:openitem>
+
+			<b:openitem key="ext-env" kind="unmeasured" severity="minor" status="open"
+				raised="2026-05-15"
+				summary="Chamber conditions and cumulative excursion from the incubator are not logged."
+				action="Log chamber temperature and humidity and total time out of incubator for each build.">
+				<b:affects targetid="6" paramname="chamber_temp"/>
+				<b:affects targetid="6" paramname="chamber_RH"/>
+				<b:affects targetid="6" paramname="time_out_of_incubator"/>
+			</b:openitem>
+
+			<b:openitem key="ext-results" kind="placeholder" severity="blocking" status="open"
+				raised="2026-05-15"
+				summary="Viability and lumen patency carry acceptance criteria but no measurements."
+				action="Run the assays and record measured values with replicate counts.">
+				<b:affects targetid="9" paramname="cell_viability_post_print"/>
+				<b:affects targetid="6" paramname="cell_viability_post_print"/>
+				<b:affects targetid="9" paramname="wall_thickness"/>
+			</b:openitem>
+
+			<b:openitem key="ext-ink-composition" kind="unverified" severity="material" status="open"
+				raised="2026-05-15"
+				summary="Alginate and gelatin concentrations are template values, not this laboratory's measured formulation."
+				action="Record the actual formulation with lot numbers and a certificate of analysis.">
+				<b:affects targetid="4" targetindex="0"/>
+				<b:affects targetid="4" targetindex="1"/>
+			</b:openitem>
+
+			<b:openitem key="mat-flow" kind="unmeasured" severity="blocking" status="open"
+				raised="2026-05-15"
+				summary="Perfusion flow rate, medium viscosity and circuit pressure are unset, so the wall shear stress the endothelium experiences is undetermined."
+				action="Set the flow rate from the target wall shear stress and the lumen radius, measure medium viscosity at 37 C, and log circuit pressure. Record all three: they are only interpretable together."
+				owner="TEMPLATE">
+				<b:affects targetid="15"/>
+				<b:affects targetid="15" paramname="flow_rate"/>
+				<b:affects targetid="15" paramname="medium_viscosity"/>
+				<b:affects targetid="15" paramname="circuit_pressure"/>
+				<b:affects targetid="15" paramname="wall_shear_stress"/>
+			</b:openitem>
+
+			<b:openitem key="mat-strain" kind="unmeasured" severity="material" status="open"
+				raised="2026-05-15"
+				summary="Cyclic tensile strain amplitude is unset; frequency and cycles per day are cited from a published regime rather than measured on this rig."
+				action="Measure the delivered strain on this bioreactor with this construct geometry, and confirm the frequency and cycle count the controller actually applies."
+				owner="TEMPLATE">
+				<b:affects targetid="15"/>
+				<b:affects targetid="15" paramname="strain_amplitude"/>
+			</b:openitem>
+
+			<b:openitem key="mat-readings" kind="placeholder" severity="blocking" status="open"
+				raised="2026-05-15"
+				summary="Every characterization reading is a placeholder. The maturation regime is specified but its effect is unmeasured."
+				action="Run the assays at the declared timepoints and record values with replicate counts and standard deviations. Record failures as well as passes."
+				owner="TEMPLATE">
+				<b:affects targetid="16"/>
+			</b:openitem>
+
+			<b:openitem key="mat-coupons" kind="unmeasured" severity="material" status="open"
+				raised="2026-05-15"
+				summary="Four assays are destructive across multiple timepoints, so each timepoint needs its own coupon. Only one test-coupon object is declared."
+				action="Print one test-coupon object per destructive timepoint and bind each reading to the coupon it consumed."
+				owner="TEMPLATE">
+				<b:affects targetid="16"/>
+				<b:affects targetid="14"/>
+			</b:openitem>
+
+			<b:openitem key="ext-cell-identity" kind="unavailable" severity="material" status="open"
+				raised="2026-05-15"
+				summary="Donor metadata, Cell Ontology and UBERON terms are unpopulated for both populations, and ethics references are placeholders."
+				action="Populate from the tissue bank record and insert the real IRB approval reference.">
+				<b:affects targetid="3" targetindex="0"/>
+				<b:affects targetid="3" targetindex="1"/>
+			</b:openitem>
+		</b:openitems>
+
+		<!-- ============ Geometry ============
+		     Each object names both the ink it is made of (core pid/pindex) and the head
+		     that deposited it. The validator checks the two agree (rule H3). -->
+		<object id="11" type="model" name="parenchyma"
+			pid="4" pindex="0"
+			b:processid="6" b:printheadid="5" b:printheadindex="0" b:regionrole="parenchyma">
+			<mesh>
+				<vertices><!-- elided --></vertices>
+				<triangles><!-- elided --></triangles>
+			</mesh>
+		</object>
+
+		<object id="12" type="model" name="vascular network"
+			pid="4" pindex="1"
+			b:processid="6" b:printheadid="5" b:printheadindex="1" b:regionrole="vasculature">
+			<mesh>
+				<vertices><!-- elided --></vertices>
+				<triangles><!-- elided --></triangles>
+			</mesh>
+		</object>
+
+		<object id="13" type="model" name="fugitive support frame"
+			pid="4" pindex="2"
+			b:processid="6" b:printheadid="5" b:printheadindex="2" b:regionrole="sacrificial">
+			<mesh>
+				<vertices><!-- elided --></vertices>
+				<triangles><!-- elided --></triangles>
+			</mesh>
+		</object>
+
+		<!-- Printed in the same run for the geometric capability test -->
+		<object id="14" type="model" name="52902 benchmark artefact"
+			pid="4" pindex="0"
+			b:processid="6" b:printheadid="5" b:printheadindex="0" b:regionrole="test-coupon">
+			<mesh>
+				<vertices><!-- elided --></vertices>
+				<triangles><!-- elided --></triangles>
+			</mesh>
+		</object>
+	</resources>
+
+	<build>
+		<item objectid="11" transform="1 0 0 0 1 0 0 0 1 0 0 0"/>
+		<item objectid="12" transform="1 0 0 0 1 0 0 0 1 0 0 0"/>
+		<item objectid="13" transform="1 0 0 0 1 0 0 0 1 0 0 0"/>
+		<item objectid="14" transform="1 0 0 0 1 0 0 0 1 25 0 0" b:processid="6"/>
+	</build>
+</model>

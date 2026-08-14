@@ -1,0 +1,107 @@
+name: pages
+
+# Build and publish 3mfbio.com. Deploys only after the validation workflow's checks pass
+# here too -- a site that documents a schema whose own examples do not validate is worse
+# than no site.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install lxml markdown
+
+      - name: Gate - the examples must validate before anything is published
+        run: |
+          python3 spec/validate_bio.py examples
+          python3 spec/validate_bio.py examples-extrusion
+          python3 spec/conformance_tests.py
+
+      - name: Rebuild the downloadable packages from source
+        run: |
+          python3 - <<'PY'
+          import os, zipfile
+          for src, out in [("examples", "examples-package.3mf"),
+                           ("examples-extrusion", "examples-extrusion-package.3mf")]:
+              with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+                  z.write(os.path.join(src, "[Content_Types].xml"), "[Content_Types].xml")
+                  for root, _, files in os.walk(src):
+                      for f in sorted(files):
+                          p = os.path.join(root, f)
+                          rel = os.path.relpath(p, src).replace(os.sep, "/")
+                          if rel != "[Content_Types].xml":
+                              z.write(p, rel)
+              print("built", out)
+          PY
+
+      - name: Build the site
+        run: python3 site/build_site.py
+
+      - name: No broken internal links
+        run: |
+          python3 - <<'PY'
+          import os, re, glob, sys
+          os.chdir("site/_build")
+          have = {"/"}
+          for root, _, fs in os.walk("."):
+              for f in fs:
+                  rel = os.path.relpath(os.path.join(root, f), ".").replace("\\", "/")
+                  have.add("/" + rel)
+                  if f == "index.html":
+                      d = os.path.relpath(root, ".").replace("\\", "/")
+                      have.add("/" if d == "." else "/" + d + "/")
+          bad = []
+          for p in glob.glob("**/*.html", recursive=True):
+              for m in re.findall(r'href="(/[^"#]*)"', open(p, encoding="utf-8").read()):
+                  t = m if m.endswith("/") or "." in os.path.basename(m) else m + "/"
+                  if t not in have and m not in have:
+                      bad.append((p, m))
+          for p, m in bad:
+              print(f"broken: {p} -> {m}")
+          if bad:
+              sys.exit(f"{len(bad)} broken internal link(s)")
+          print("no broken internal links")
+          PY
+
+      - name: The namespace URI must resolve, and must serve the schema
+        run: |
+          test -f site/_build/ns/bio/2026/07/index.html
+          test -f site/_build/ns/bio/2026/07/bio.xsd
+          test -f site/_build/ns/bio/2026/07/bio.sch
+          test -f site/_build/CNAME
+          echo "namespace serves"
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/_build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
