@@ -19,6 +19,7 @@ authors:
     orcid: "https://orcid.org/0000-0003-2941-0604"
     affiliation: "Brinter AM Technologies Oy"
 version: 0.9.0
+doi: "10.5281/zenodo.21939414"
 repository-code: "https://github.com/Brinter-AM-Technologies-oy/3mf-bio"
 url: "https://3mfbio.com"
 license: BSD-2-Clause
