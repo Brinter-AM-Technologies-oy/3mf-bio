@@ -20,7 +20,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install lxml markdown
+        run: pip install -r requirements.txt
 
       - name: Versions agree across every file that states one
         run: |

@@ -128,6 +128,13 @@ def check_tools():
 
 
 def check_site():
+    # A missing dependency is not a broken site. Report it as such: anyone running verify.py
+    # with only lxml installed should be told what to install, not shown a red failure for a
+    # check that never ran.
+    try:
+        import markdown  # noqa: F401
+    except ImportError:
+        return None, "skipped: markdown not installed (pip install -r requirements.txt)"
     ok, out = run(["site/build_site.py"])
     if not ok:
         return False, out.strip()[-100:]
@@ -156,6 +163,8 @@ def check_site():
 
 def check_namespace_served():
     b = os.path.join(ROOT, "site", "_build", "ns", "bio", "2026", "07")
+    if not os.path.exists(os.path.join(ROOT, "site", "_build")):
+        return None, "skipped: site not built (see the site check above)"
     missing = [f for f in ("index.html", "bio.xsd", "bio.libxml.xsd", "bio.sch")
                if not os.path.exists(os.path.join(b, f))]
     return not missing, ("namespace URI resolves and serves schema + rules"
@@ -297,16 +306,22 @@ def main():
     print(f"\n{'=' * 74}\n  3MF Bio — full verification\n{'=' * 74}\n")
     print("CHECKS  automated, run now\n")
 
-    failed = 0
+    failed = skipped = 0
     for label, fn in CHECKS:
         try:
             ok, detail = fn()
         except Exception as e:
             ok, detail = False, f"raised: {type(e).__name__}: {e}"
-        failed += not ok
-        mark = f"{GREEN}PASS{RESET}" if ok else f"{RED}FAIL{RESET}"
+        if ok is None:
+            skipped += 1
+            mark = f"{YELLOW}SKIP{RESET}"
+        else:
+            failed += not ok
+            mark = f"{GREEN}PASS{RESET}" if ok else f"{RED}FAIL{RESET}"
         print(f"  {mark}  {label:<40} {DIM}{detail}{RESET}")
-    print(f"\n  {len(CHECKS) - failed}/{len(CHECKS)} passing")
+    ran = len(CHECKS) - skipped
+    print(f"\n  {ran - failed}/{ran} passing" +
+          (f", {skipped} skipped" if skipped else ""))
 
     b = blockers()
     if not a.ci:

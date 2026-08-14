@@ -104,7 +104,21 @@ def check_dependencies(files, wfdir):
     for wf in files:
         s = open(os.path.join(wfdir, wf), encoding="utf-8").read()
         m = re.search(r"pip install ([^\n]+)", s)
-        declared = set(m.group(1).split()) if m else set()
+        spec = m.group(1).strip() if m else ""
+        if spec.startswith("-r "):
+            req = os.path.join(ROOT, spec.split(None, 1)[1])
+            declared = set()
+            if os.path.exists(req):
+                for line in open(req, encoding="utf-8"):
+                    line = line.split("#")[0].strip()
+                    if line:
+                        declared.add(re.split(r"[<>=!\[]", line)[0].strip())
+            else:
+                print(f"  FAIL  {wf}: installs from {spec.split()[1]}, which does not exist")
+                fails += 1
+                continue
+        else:
+            declared = set(spec.split())
         # which scripts does this workflow actually invoke
         invoked = set(re.findall(r"python3 ([\w/\.\-]+\.py)", s))
         needed = set()
